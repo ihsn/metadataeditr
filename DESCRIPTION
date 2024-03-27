@@ -1,0 +1,37 @@
+Package: metadataeditr
+Type: Package
+Title: Metadata Editor API Client for R
+Version: 0.1.0
+Author: Mehmood Asghar
+Maintainer: The package maintainer <mah0001@gmail.com>
+Description: R client for Metadata Editor API
+License: MIT
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.1
+Suggests:
+  testthat
+Depends: 
+    jsonlite, 
+    httr, 
+    curl,
+    pdftools,
+    XML,
+    readr,
+    haven,
+    stringi,
+    stringr,
+    plyr,
+    rlist
+Imports:
+    jsonlite,
+    httr,
+    curl,
+    pdftools,
+    XML,
+    readr,
+    haven,
+    stringi,
+    stringr,
+    plyr,
+    rlist
