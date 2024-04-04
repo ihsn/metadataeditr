@@ -287,7 +287,7 @@ update_project <- function(
 #' Find a project by IDNO
 #'
 #' @return NULL
-#' @param idno (required) Study unique identifier
+#' @param idno (required) Project unique identifier
 #' @param api_key API key (optional if API key is set using set_api_key)
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
 #'
@@ -322,6 +322,62 @@ project_by_idno <- function(
                       verbose(get_verbose())
                       )
                       
+  
+  output=NULL
+  
+  if(httpResponse$status_code!=200){
+    warning(content(httpResponse, "text"))
+  }
+  
+  output=list(
+    "status_code"=httpResponse$status_code,
+    "response"=fromJSON(content(httpResponse,"text"))
+  )
+  
+  return (output)
+}
+
+
+#' Find a project by ID
+#'
+#' Find a project by ID
+#'
+#' @return NULL
+#' @param id (required) Project numeric ID
+#' @param api_key API key (optional if API key is set using set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#'
+#' @examples
+#'
+#' project_by_id (
+#'   id=12
+#' )
+#'
+#' @export
+project_by_id <- function(
+    id,
+    api_key=NULL,
+    api_base_url=NULL){
+  
+  if(is.null(api_key)){
+    api_key=get_api_key();
+  }
+  
+  endpoint <- paste0('editor/',id)
+  
+  if(is.null(api_base_url)){
+    url=get_api_url(endpoint=endpoint)
+  } else {
+    url = paste0(api_base_url,"/",endpoint)
+  }
+  
+  print(url)
+  
+  httpResponse <- GET(url, 
+                      add_headers("X-API-KEY" = api_key),
+                      verbose(get_verbose())
+  )
+  
   
   output=NULL
   
