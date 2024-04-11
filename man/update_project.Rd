@@ -10,7 +10,6 @@ update_project(
   metadata,
   partial_update = FALSE,
   thumbnail = NULL,
-  overwrite = FALSE,
   api_key = NULL,
   api_base_url = NULL
 )
@@ -23,6 +22,8 @@ update_project(
 \item{metadata}{\strong{(required)} Metadata list depending on the type of study}
 
 \item{partial_update}{Update only partial metadata (TRUE/FALSE)}
+
+\item{thumbnail}{Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG}
 
 \item{api_key}{API key (optional if API key is set using set_api_key)}
 

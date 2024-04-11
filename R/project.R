@@ -118,6 +118,8 @@ list_projects <- function(
 #' @param type (required) Type of project - survey, geospatial, table, document, timeseries
 #' @param idno \strong{(required)} Project unique IDNO
 #' @param metadata \strong{(required)} Metadata list depending on the type of study
+#' @param thumbnail Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG
+#' @param overwrite Overwrite an existing project? TRUE | FALSE
 #' @param api_key API key (optional if API key is set using set_api_key)
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
 #'
@@ -147,6 +149,16 @@ create_project <- function(
     api_key=get_api_key();
   }
   
+  
+  httpResponse=NULL
+  output=NULL
+  
+  if (overwrite==TRUE){
+    # Update an existing project
+    update_response<-update_project(type=type, idno=idno, metadata=metadata, thumbnail=thumbnail, partial_update = FALSE)
+    return (update_response)
+  }
+  
 
   # Create url
   endpoint <- paste0('editor/create/',type)
@@ -163,9 +175,7 @@ create_project <- function(
                        encode="json",
                        accept_json(),
                        verbose(get_verbose()))
-  
-  output=NULL
-  
+
   if(httpResponse$status_code!=200){
     warning(content(httpResponse, "text"))
   }
@@ -201,6 +211,7 @@ create_project <- function(
 #' @param idno \strong{(required)} Project unique IDNO
 #' @param metadata \strong{(required)} Metadata list depending on the type of study
 #' @param partial_update Update only partial metadata (TRUE/FALSE)
+#' @param thumbnail Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG
 #' @param api_key API key (optional if API key is set using set_api_key)
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
 #'
@@ -223,7 +234,6 @@ update_project <- function(
     metadata,
     partial_update=FALSE,
     thumbnail=NULL,
-    overwrite=FALSE,
     api_key=NULL,
     api_base_url=NULL){
   

@@ -21,6 +21,10 @@ create_project(
 
 \item{metadata}{\strong{(required)} Metadata list depending on the type of study}
 
+\item{thumbnail}{Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG}
+
+\item{overwrite}{Overwrite an existing project? TRUE | FALSE}
+
 \item{api_key}{API key (optional if API key is set using set_api_key)}
 
 \item{api_base_url}{API base endpoint (optional if API base endpoint is set using set_api_url)}
