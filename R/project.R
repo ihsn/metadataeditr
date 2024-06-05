@@ -156,6 +156,7 @@ create_project <- function(
   
   httpResponse=NULL
   output=NULL
+  metadata$idno=idno
   metadata$overwrite=overwrite
   metadata$collection_ids=collection_ids
   metadata$collection_names=collection_names
