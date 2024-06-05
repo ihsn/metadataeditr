@@ -103,7 +103,6 @@ resources_list <- function(idno, api_key=NULL, api_base_url=NULL){
 #' @param abstract  Resource abstract
 #' @param toc Table of contents
 #' @param file_path File path for uploading
-#' @param overwrite Overwrite if resource already exists? Accepted values "yes", "no"
 #'
 #'
 #'
@@ -151,8 +150,8 @@ resources_add <- function(
     description=description,
     abstract=abstract,
     toc=toc,
-    subjects=subjects,
-    overwrite=overwrite
+    subjects=subjects
+    #overwrite=overwrite
   )
   
   if (!is.null(file_path) && file.exists(file_path)){
@@ -206,7 +205,6 @@ resources_add <- function(
 #' @param abstract  Resource abstract
 #' @param toc Table of contents
 #' @param file_path File path for uploading
-#' @param overwrite Overwrite if resource already exists? Accepted values "yes", "no"
 #'
 #'
 #'

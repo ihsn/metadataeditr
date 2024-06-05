@@ -60,8 +60,6 @@ resources_add(
 \item{file}{External resource file to be uploaded}
 
 \item{resource_type}{Resource type - documentation, data}
-
-\item{overwrite}{Overwrite if resource already exists? Accepted values "yes", "no"}
 }
 \description{
 Upload an external resource file

@@ -59,8 +59,6 @@ resources_update(
 \item{toc}{Table of contents}
 
 \item{file_path}{File path for uploading}
-
-\item{overwrite}{Overwrite if resource already exists? Accepted values "yes", "no"}
 }
 \description{
 Update resource
