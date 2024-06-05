@@ -9,6 +9,8 @@ create_project(
   idno,
   metadata,
   thumbnail = NULL,
+  collection_ids = list(),
+  collection_names = list(),
   overwrite = FALSE,
   api_key = NULL,
   api_base_url = NULL
@@ -23,11 +25,15 @@ create_project(
 
 \item{thumbnail}{Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG}
 
+\item{collection_names}{list of collection Names to assign to project}
+
 \item{overwrite}{Overwrite an existing project? TRUE | FALSE}
 
 \item{api_key}{API key (optional if API key is set using set_api_key)}
 
 \item{api_base_url}{API base endpoint (optional if API base endpoint is set using set_api_url)}
+
+\item{collection_id}{List of collection IDs to assign to project}
 }
 \description{
 Create a new project

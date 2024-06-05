@@ -119,6 +119,8 @@ list_projects <- function(
 #' @param idno \strong{(required)} Project unique IDNO
 #' @param metadata \strong{(required)} Metadata list depending on the type of study
 #' @param thumbnail Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG
+#' @param collection_id List of collection IDs to assign to project
+#' @param collection_names list of collection Names to assign to project
 #' @param overwrite Overwrite an existing project? TRUE | FALSE
 #' @param api_key API key (optional if API key is set using set_api_key)
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
@@ -141,6 +143,8 @@ create_project <- function(
     idno,
     metadata,
     thumbnail=NULL,
+    collection_ids=list(),
+    collection_names=list(),
     overwrite=FALSE,
     api_key=NULL,
     api_base_url=NULL){
@@ -152,12 +156,15 @@ create_project <- function(
   
   httpResponse=NULL
   output=NULL
+  metadata$overwrite=overwrite
+  metadata$collection_ids=collection_ids
+  metadata$collection_names=collection_names
   
-  if (overwrite==TRUE){
-    # Update an existing project
-    update_response<-update_project(type=type, idno=idno, metadata=metadata, thumbnail=thumbnail, partial_update = FALSE)
-    return (update_response)
-  }
+  #if (overwrite==TRUE){
+  #  # Update an existing project
+  #  update_response<-update_project(type=type, idno=idno, metadata=metadata, thumbnail=thumbnail, partial_update = FALSE)
+  #  return (update_response)
+  #}
   
 
   # Create url
@@ -398,6 +405,80 @@ project_by_id <- function(
   output=list(
     "status_code"=httpResponse$status_code,
     "response"=fromJSON(content(httpResponse,"text"))
+  )
+  
+  return (output)
+}
+
+
+
+
+#' Import project
+#'
+#' Import project
+#'
+#' @return NULL
+#' @param type (required) Type of project - survey, geospatial, table, document, timeseries
+#' @param file_path Path to project file. Supported types are DDI/XML, JSON or project package zip
+#' @param api_key API key (optional if API key is set using set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#'
+#' @examples
+#'
+#'
+#' import_project (
+#'   type="timeseries",
+#'   file_path = "/files/some-project.zip"
+#' )
+#'
+#'
+#'
+#'
+#' @export
+import_project <- function(
+    type,
+    file_path,
+    api_key=NULL,
+    api_base_url=NULL){
+  
+  if(is.null(api_key)){
+    api_key=get_api_key();
+  }
+  
+  
+  httpResponse=NULL
+  output=NULL
+  
+  # Create url
+  endpoint <- paste0('importproject')
+  if(is.null(api_base_url)){
+    url=get_api_url(endpoint=endpoint)
+  } else {
+    url = paste0(api_base_url,"/",endpoint)
+  }
+  
+  if (!file.exists(file_path)){
+    stop(paste("File not found: ", file_path))
+  }
+  
+  options=list(
+    type=type,
+    file=upload_file(file_path)
+  )
+  
+  httpResponse <- POST(url,
+                       add_headers("X-API-KEY" = api_key),
+                       body=options,
+                       verbose(get_verbose()))
+  
+  if(httpResponse$status_code!=200){
+    warning(content(httpResponse, "text"))
+  }
+  
+
+  output=list(
+    "status_code"=httpResponse$status_code,
+    "response"= metadataedit_http_response_json(httpResponse)
   )
   
   return (output)
