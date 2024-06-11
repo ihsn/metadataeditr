@@ -63,7 +63,7 @@ list_collections <- function(
 #' Add projects to a collection
 #'
 #' @return NULL
-#' @param collection_id (required) Collection ID
+#' @param collections \strong{(required)} List of Collection IDs
 #' @param projects \strong{(required)} List of projects
 #' @param api_key API key (optional if API key is set using set_api_key)
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
@@ -72,7 +72,7 @@ list_collections <- function(
 #'
 #'
 #' collection_add_projects (
-#'   collection_id=123,
+#'   collections=c(12,45,100),
 #'   projects = c("unique-idno-for-project", "another-project-idno")
 #' )
 #'
@@ -81,7 +81,7 @@ list_collections <- function(
 #'
 #' @export
 collection_add_projects <- function(
-    collection_id,
+    collections=c(),
     projects=c(),
     api_key=NULL,
     api_base_url=NULL){
@@ -91,7 +91,7 @@ collection_add_projects <- function(
   }
   
   options=list(
-    collection_id=collection_id,
+    collections=collections,
     id_format="idno",
     projects=projects
   )

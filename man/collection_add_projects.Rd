@@ -5,14 +5,14 @@
 \title{Add projects to a collection}
 \usage{
 collection_add_projects(
-  collection_id,
+  collections = c(),
   projects = c(),
   api_key = NULL,
   api_base_url = NULL
 )
 }
 \arguments{
-\item{collection_id}{(required) Collection ID}
+\item{collections}{\strong{(required)} List of Collection IDs}
 
 \item{projects}{\strong{(required)} List of projects}
 
@@ -27,7 +27,7 @@ Add projects to a collection
 
 
 collection_add_projects (
-  collection_id=123,
+  collections=c(12,45,100),
   projects = c("unique-idno-for-project", "another-project-idno")
 )
 
