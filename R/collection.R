@@ -83,6 +83,7 @@ list_collections <- function(
 collection_add_projects <- function(
     collections=c(),
     projects=c(),
+    id_format="id",
     api_key=NULL,
     api_base_url=NULL){
   
@@ -92,7 +93,7 @@ collection_add_projects <- function(
   
   options=list(
     collections=collections,
-    id_format="idno",
+    id_format=id_format,
     projects=projects
   )
   
@@ -150,8 +151,9 @@ collection_add_projects <- function(
 #'
 #' @export
 collection_remove_projects <- function(
-    collection_id,
+    collections=c(),
     projects=c(),
+    id_format="id",
     api_key=NULL,
     api_base_url=NULL){
   
@@ -160,8 +162,8 @@ collection_remove_projects <- function(
   }
   
   options=list(
-    collection_id=collection_id,
-    id_format="idno",
+    collections=collections,
+    id_format=id_format,
     projects=projects
   )
   
