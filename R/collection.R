@@ -208,6 +208,13 @@ collection_remove_projects <- function(
 #' 
 #' @param id \strong{(required)} Numeric project id
 #' 
+#' @examples
+#' 
+#' collection_list_by_project(
+#'   id = "unique-id-for-project"
+#' )
+#' 
+#' @export
 collection_list_by_project <- function(
     id,
     api_key=NULL,

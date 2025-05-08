@@ -15,3 +15,10 @@ list
 \description{
 List all collections in which a project is included
 }
+\examples{
+
+collection_list_by_project(
+  id = "unique-id-for-project"
+)
+
+}

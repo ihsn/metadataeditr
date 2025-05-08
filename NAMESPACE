@@ -3,6 +3,7 @@
 export(ProjectTypes)
 export(capture_pdf_cover)
 export(collection_add_projects)
+export(collection_list_by_project)
 export(collection_remove_projects)
 export(create_project)
 export(get_api_key)
