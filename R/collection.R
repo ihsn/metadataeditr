@@ -65,6 +65,7 @@ list_collections <- function(
 #' @return NULL
 #' @param collections \strong{(required)} List of Collection IDs
 #' @param projects \strong{(required)} List of projects
+#' @param id_format \strong{(optional)} ID format (default: "idno") - alternative "id"
 #' @param api_key API key (optional if API key is set using set_api_key)
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
 #'
@@ -83,7 +84,7 @@ list_collections <- function(
 collection_add_projects <- function(
     collections=c(),
     projects=c(),
-    id_format="id",
+    id_format="idno",
     api_key=NULL,
     api_base_url=NULL){
   
@@ -135,6 +136,7 @@ collection_add_projects <- function(
 #' @return NULL
 #' @param collection_id (required) Collection ID
 #' @param projects \strong{(required)} List of projects
+#' @param id_format \strong{(optional)} ID format (default: "idno") - alternative "id"
 #' @param api_key API key (optional if API key is set using set_api_key)
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
 #'
@@ -153,7 +155,7 @@ collection_add_projects <- function(
 collection_remove_projects <- function(
     collections=c(),
     projects=c(),
-    id_format="id",
+    id_format="idno",
     api_key=NULL,
     api_base_url=NULL){
   
@@ -197,4 +199,53 @@ collection_remove_projects <- function(
   
   return (output)
 }
+
+#' List all collections for a project
+#' 
+#' List all collections in which a project is included
+#' 
+#' @return list
+#' 
+#' @param id \strong{(required)} Numeric project id
+#' 
+#' @examples
+#' 
+#' collection_list_by_project(
+#'   id = "unique-id-for-project"
+#' )
+#' 
+#' @export
+collection_list_by_project <- function(
+    id,
+    api_key=NULL,
+    api_base_url=NULL){
+  
+  # Get api_key if not provided
+  if(is.null(api_key)){
+    api_key=get_api_key();
+  }
+  
+  # API endpoint
+  endpoint <- paste0('editor/collections/', id)
+  
+  url=get_api_url(endpoint)
+  
+  httpResponse <- GET(url, add_headers("X-API-KEY" = api_key), 
+                      accept_json(), 
+                      verbose(get_verbose()))
+  output=NULL
+  
+  if(httpResponse$status_code!=200){
+    warning(content(httpResponse, "text"))
+  }
+  
+  output=list(
+    "status_code"=httpResponse$status_code,
+    "response"=fromJSON(content(httpResponse,"text"))
+  )
+  
+  return (output)
+}
+
+
 

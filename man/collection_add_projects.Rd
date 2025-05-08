@@ -7,6 +7,7 @@
 collection_add_projects(
   collections = c(),
   projects = c(),
+  id_format = "idno",
   api_key = NULL,
   api_base_url = NULL
 )
@@ -15,6 +16,8 @@ collection_add_projects(
 \item{collections}{\strong{(required)} List of Collection IDs}
 
 \item{projects}{\strong{(required)} List of projects}
+
+\item{id_format}{\strong{(optional)} ID format (default: "idno") - alternative "id"}
 
 \item{api_key}{API key (optional if API key is set using set_api_key)}
 
