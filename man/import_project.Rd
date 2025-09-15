@@ -4,7 +4,13 @@
 \alias{import_project}
 \title{Import project}
 \usage{
-import_project(type, file_path, api_key = NULL, api_base_url = NULL)
+import_project(
+  type,
+  file_path,
+  idno = NULL,
+  api_key = NULL,
+  api_base_url = NULL
+)
 }
 \arguments{
 \item{type}{(required) Type of project - survey, geospatial, table, document, timeseries}

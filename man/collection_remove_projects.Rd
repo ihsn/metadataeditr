@@ -5,20 +5,21 @@
 \title{Remove projects from a collection}
 \usage{
 collection_remove_projects(
-  collection_id,
+  collections = c(),
   projects = c(),
+  id_format = "id",
   api_key = NULL,
   api_base_url = NULL
 )
 }
 \arguments{
-\item{collection_id}{(required) Collection ID}
-
 \item{projects}{\strong{(required)} List of projects}
 
 \item{api_key}{API key (optional if API key is set using set_api_key)}
 
 \item{api_base_url}{API base endpoint (optional if API base endpoint is set using set_api_url)}
+
+\item{collection_id}{(required) Collection ID}
 }
 \description{
 Remove projects from a collection

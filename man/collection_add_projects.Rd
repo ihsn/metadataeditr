@@ -7,6 +7,7 @@
 collection_add_projects(
   collections = c(),
   projects = c(),
+  id_format = "id",
   api_key = NULL,
   api_base_url = NULL
 )

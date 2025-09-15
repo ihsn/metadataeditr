@@ -439,6 +439,7 @@ project_by_id <- function(
 import_project <- function(
     type,
     file_path,
+    idno=NULL,
     api_key=NULL,
     api_base_url=NULL){
   
@@ -464,6 +465,7 @@ import_project <- function(
   
   options=list(
     type=type,
+    idno=idno,
     file=upload_file(file_path)
   )
   
