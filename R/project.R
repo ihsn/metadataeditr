@@ -299,6 +299,80 @@ update_project <- function(
 
 
 
+#' Patch project metadata
+#'
+#' Apply JSON Patch operations to a project's metadata.
+#'
+#' @return list
+#' @param type (required) Type of project - survey, geospatial, table, document, timeseries, timeseries-db, image, script, video
+#' @param idno (required) Project unique IDNO or numeric ID
+#' @param patches (required) List of JSON Patch operations (each a list with op, path, and optional value)
+#' @param api_key API key (optional if API key is set using set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#'
+#' @examples
+#'
+#'
+#' patch_project(
+#'   type="document",
+#'   idno="project-document-idno-001",
+#'   patches=list(
+#'     list(op="replace", path="/document_description/title_statement/title", value="New title"),
+#'     list(op="add", path="/document_description/notes/-", value="Additional note")
+#'   )
+#' )
+#'
+#'
+#'
+#'
+#' @export
+patch_project <- function(
+    type,
+    idno,
+    patches=list(),
+    api_key=NULL,
+    api_base_url=NULL){
+  
+  if(is.null(api_key)){
+    api_key=get_api_key();
+  }
+  
+  if(length(patches)==0){
+    stop("'patches' cannot be empty. Provide JSON Patch operations.")
+  }
+  
+  endpoint <- paste0('editor/patch/',type,'/',idno)
+  
+  if(is.null(api_base_url)){
+    url=get_api_url(endpoint=endpoint)
+  } else {
+    url = paste0(api_base_url,"/",endpoint)
+  }
+  
+  httpResponse <- POST(url,
+                       add_headers("X-API-KEY" = api_key),
+                       body=patches,
+                       content_type_json(),
+                       encode="json",
+                       accept_json(),
+                       verbose(get_verbose()))
+  
+  output=NULL
+  
+  if(httpResponse$status_code!=200){
+    warning(content(httpResponse, "text"))
+  }
+  
+  output=list(
+    "status_code"=httpResponse$status_code,
+    "response"= metadataedit_http_response_json(httpResponse)
+  )
+  
+  return (output)
+}
+
+
+
 
 #' Find a project by IDNO
 #'
