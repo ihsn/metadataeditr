@@ -10,6 +10,7 @@ update_project(
   metadata,
   partial_update = FALSE,
   thumbnail = NULL,
+  collection_ids = list(),
   api_key = NULL,
   api_base_url = NULL
 )
@@ -24,6 +25,8 @@ update_project(
 \item{partial_update}{Update only partial metadata (TRUE/FALSE)}
 
 \item{thumbnail}{Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG}
+
+\item{collection_ids}{List of collection IDs to assign to project}
 
 \item{api_key}{API key (optional if API key is set using set_api_key)}
 

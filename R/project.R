@@ -119,16 +119,16 @@ list_projects <- function(
 #' @param idno \strong{(required)} Project unique IDNO
 #' @param metadata \strong{(required)} Metadata list depending on the type of study
 #' @param thumbnail Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG
-#' @param collection_id List of collection IDs to assign to project
-#' @param collection_names list of collection Names to assign to project
+#' @param collection_ids List of collection IDs to assign to project
 #' @param overwrite Overwrite an existing project? TRUE | FALSE
+#' @param template_uid UID of the form template to assign to the project
 #' @param api_key API key (optional if API key is set using set_api_key)
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
 #'
 #' @examples
 #'
 #'
-#' create (
+#' create_project (
 #'   type="survey",
 #'   idno = "unique-idno-for-project",
 #'   metadata = list()
@@ -144,8 +144,8 @@ create_project <- function(
     metadata,
     thumbnail=NULL,
     collection_ids=list(),
-    collection_names=list(),
     overwrite=FALSE,
+    template_uid=NULL,
     api_key=NULL,
     api_base_url=NULL){
   
@@ -157,15 +157,16 @@ create_project <- function(
   httpResponse=NULL
   output=NULL
   metadata$idno=idno
-  metadata$overwrite=overwrite
-  metadata$collection_ids=collection_ids
-  metadata$collection_names=collection_names
   
-  #if (overwrite==TRUE){
-  #  # Update an existing project
-  #  update_response<-update_project(type=type, idno=idno, metadata=metadata, thumbnail=thumbnail, partial_update = FALSE)
-  #  return (update_response)
-  #}
+  metadata$collection_ids=collection_ids
+  
+  if (overwrite==TRUE){
+    metadata$overwrite="yes"  
+  }
+
+  if (!is.null(template_uid)){
+    metadata$template_uid=template_uid
+  }
   
 
   # Create url
@@ -175,6 +176,8 @@ create_project <- function(
   } else {
     url = paste0(api_base_url,"/",endpoint)
   }
+  
+  print(url)
   
   httpResponse <- POST(url,
                        add_headers("X-API-KEY" = api_key),
@@ -220,6 +223,7 @@ create_project <- function(
 #' @param metadata \strong{(required)} Metadata list depending on the type of study
 #' @param partial_update Update only partial metadata (TRUE/FALSE)
 #' @param thumbnail Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG
+#' @param collection_ids List of collection IDs to assign to project
 #' @param api_key API key (optional if API key is set using set_api_key)
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
 #'
@@ -242,6 +246,7 @@ update_project <- function(
     metadata,
     partial_update=FALSE,
     thumbnail=NULL,
+    collection_ids=list(),
     api_key=NULL,
     api_base_url=NULL){
   
@@ -252,6 +257,8 @@ update_project <- function(
   if (partial_update==TRUE){
     metadata$partial_update=TRUE
   }
+
+  metadata$collection_ids=collection_ids
   
   # Create url
   endpoint <- paste0('editor/update/',type,"/",idno)

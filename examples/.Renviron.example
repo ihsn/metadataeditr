@@ -1,0 +1,4 @@
+# Copy to examples/.Renviron and replace the placeholder with your real key.
+# This file is committed; keep examples/.Renviron out of version control.
+METADATAEDITR_API_KEY=your-api-key
+METADATAEDITR_API_BASE_URL=https://your.api.base.url
