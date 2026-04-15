@@ -15,7 +15,7 @@ indicator_import_job_submit(
 )
 }
 \arguments{
-\item{project_id}{(required) Numeric project ID}
+\item{project_id}{(required) Numeric project id or project idno (same as other editor APIs)}
 
 \item{upload_id}{(required) Completed upload session ID from \code{upload_file_chunked}}
 

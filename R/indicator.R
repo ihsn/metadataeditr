@@ -71,6 +71,47 @@ job_wait <- function(job_uuid,
   }
 }
 
+# Used by indicator_import_job_submit. Integer NA is not is.numeric() in R, so it used to fall
+# through to as.character() -> "NA" in JSON and the API error IDNO-NOT-FOUND: NA.
+normalize_project_id_for_import_job <- function(project_id, arg_name = "project_id") {
+  if (missing(project_id)) {
+    stop(sprintf("%s is required", arg_name), call. = FALSE)
+  }
+  if (is.null(project_id) || length(project_id) != 1L) {
+    stop(sprintf("%s must be a single value (numeric id or idno string)", arg_name), call. = FALSE)
+  }
+  if (anyNA(project_id)) {
+    stop(sprintf(
+      paste0(
+        "%s is NA. Use a numeric project id (e.g. resp$response$project$id from create_project) ",
+        "or a non-empty idno string."
+      ),
+      arg_name
+    ), call. = FALSE)
+  }
+
+  if (is.numeric(project_id) || is.integer(project_id)) {
+    out <- suppressWarnings(as.integer(project_id))
+    if (length(out) != 1L || is.na(out)) {
+      stop(sprintf("%s must be a finite integer project id", arg_name), call. = FALSE)
+    }
+    return(out)
+  }
+
+  s <- trimws(as.character(project_id))
+  if (nchar(s) == 0L || identical(toupper(s), "NA")) {
+    stop(sprintf("%s is empty or invalid", arg_name), call. = FALSE)
+  }
+  if (grepl("^[0-9]+$", s)) {
+    out <- suppressWarnings(as.integer(s))
+    if (is.na(out)) {
+      stop(sprintf("%s is not a valid integer project id", arg_name), call. = FALSE)
+    }
+    return(out)
+  }
+  s
+}
+
 
 #' Submit an indicator data import job
 #'
@@ -82,7 +123,7 @@ job_wait <- function(job_uuid,
 #' Use \code{\link{import_indicator_data}} for a single call that handles upload,
 #' job submission, and polling in one step.
 #'
-#' @param project_id      (required) Numeric project ID
+#' @param project_id      (required) Numeric project id or project idno (same as other editor APIs)
 #' @param upload_id       (required) Completed upload session ID from \code{upload_file_chunked}
 #' @param indicator_value (required) The indicator code to import (e.g. \code{"NY.GDP.PCAP.CD"}).
 #'   Only rows whose indicator_id column matches this value will be imported.
@@ -109,11 +150,18 @@ indicator_import_job_submit <- function(project_id,
     url <- paste0(api_base_url, "/jobs/import_indicator_data")
   }
 
+  pid_json <- normalize_project_id_for_import_job(project_id)
+
+  prio <- suppressWarnings(as.integer(priority))
+  if (length(prio) != 1L || is.na(prio)) {
+    stop("priority must be a single integer", call. = FALSE)
+  }
+
   body <- list(
-    project_id = as.integer(project_id),
+    project_id = pid_json,
     upload_id  = as.character(upload_id),
     delimiter  = as.character(delimiter),
-    priority   = as.integer(priority)
+    priority   = prio
   )
   if (missing(indicator_value) || is.null(indicator_value) || nchar(trimws(as.character(indicator_value))) == 0) {
     stop("indicator_value is required")
@@ -155,7 +203,7 @@ indicator_import_job_submit <- function(project_id,
 #'   \item Polls until the job completes (or fails / times out)
 #' }
 #'
-#' @param project_id      (required) Numeric project ID of an indicator/timeseries project
+#' @param project_id      (required) Numeric project id or idno of an indicator/timeseries project
 #' @param csv_file        (required) Path to the local CSV file
 #' @param indicator_value (required) The indicator code to import (e.g. \code{"NY.GDP.PCAP.CD"}).
 #'   Only rows whose indicator_id column matches this value will be imported.

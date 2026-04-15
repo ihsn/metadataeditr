@@ -18,7 +18,7 @@ import_indicator_data(
 )
 }
 \arguments{
-\item{project_id}{(required) Numeric project ID of an indicator/timeseries project}
+\item{project_id}{(required) Numeric project id or idno of an indicator/timeseries project}
 
 \item{csv_file}{(required) Path to the local CSV file}
 
