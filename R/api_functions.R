@@ -1,18 +1,23 @@
-#' Set API settings
+#' Set API URL and key
 #'
-#' `me_set_api` is used to set the API settings consisting of the API URL, the API key and the verbose option.
-#' `me_set_api` is a wrapper for the functions `me_set_api_url`, `me_set_api_key` and `me_set_api_verbose`.
+#' Convenience wrapper that calls \code{\link{me_set_api_url}}, \code{\link{me_set_api_key}},
+#' and \code{\link{me_set_api_verbose}}.
 #'
-#' @param api_url API base endpoint (URL)
-#' @param api_key API key
-#' @param verbose Verbose setting for API call (default is FALSE)
+#' @param api_url API base endpoint URL (include trailing slash if your paths expect it).
+#' @param api_key API key for \code{X-API-KEY}.
+#' @param verbose Logical; passed to \code{\link{me_set_api_verbose}} (default \code{FALSE}).
+#'
+#' @return Invisibly \code{NULL}.
 #'
 #' @examples
-#' #me_set_api("http://mynadacatalog.myorganization.org/index.php/api/", "abc123", verbose = TRUE)
+#' me_set_api("https://your-editor.example.org/index.php/api/", "YOUR_API_KEY")
+#'
+#' @export
 me_set_api <- function(api_url, api_key, verbose = FALSE) {
   me_set_api_url(api_url)
   me_set_api_key(api_key)
   me_set_api_verbose(verbose)
+  invisible(NULL)
 }
 
 #' Set API key

@@ -37,9 +37,10 @@ library(metadataeditr)
 # Quick start
 
 ```r
-me_set_api_url("https://your-editor.example.org/index.php/api/")
-me_set_api_key("YOUR_API_KEY")
+me_set_api("https://your-editor.example.org/index.php/api/", "YOUR_API_KEY")
 ```
+
+Alternatively set URL and key separately: `me_set_api_url()`, `me_set_api_key()`.
 
 For usage examples by area, see [`examples.md`](examples.md).
 
@@ -52,6 +53,7 @@ Short reference for package exports. Paths and payloads match the Editor OpenAPI
 
 | Function | Description |
 |----------|-------------|
+| `me_set_api` | Set API base URL, key, and verbose flag in one call |
 | `me_set_api_url` | Store the API base URL for subsequent requests |
 | `me_get_api_url` | Build full URL from base plus optional endpoint path segment |
 | `me_set_api_key` | Store the API key for `X-API-KEY` |

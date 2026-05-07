@@ -3,8 +3,7 @@
 Set your API endpoint and key first:
 
 ```r
-me_set_api_url("https://your-editor.example.org/index.php/api/")
-me_set_api_key("YOUR_API_KEY")
+me_set_api("https://your-editor.example.org/index.php/api/", "YOUR_API_KEY")
 ```
 
 ## Template API examples
