@@ -186,27 +186,36 @@ project_collections <- me_collection_by_project(project_id = "PROJECT-IDNO-1")
 List resources for a project:
 
 ```r
-resources <- me_resources_list(idno = "PROJECT-IDNO-1")
+resources <- me_resource_list(idno = "PROJECT-IDNO-1")
 ```
 
 Add / update / delete / import RDF:
 
 ```r
-added <- me_resources_add(
+added <- me_resource_add(
   idno = "PROJECT-IDNO-1",
   dctype = "Documentation",
   title = "My resource"
 )
 
-updated <- me_resources_update(
+# Replace existing resource that already uses the same stored filename (optional)
+added_replace <- me_resource_add(
+  idno = "PROJECT-IDNO-1",
+  dctype = "Documentation",
+  title = "My resource",
+  file_path = "/path/to/file.pdf",
+  overwrite = TRUE
+)
+
+updated <- me_resource_update(
   idno = "PROJECT-IDNO-1",
   resource_id = 101,
   title = "Renamed resource"
 )
 
-deleted <- me_resources_delete(idno = "PROJECT-IDNO-1", resource_id = 101)
+deleted <- me_resource_delete(idno = "PROJECT-IDNO-1", resource_id = 101)
 
-imported <- me_resources_import_rdf(
+imported <- me_resource_import_rdf(
   idno = "PROJECT-IDNO-1",
   rdf_file = "/path/to/resources.rdf"
 )
@@ -215,11 +224,11 @@ imported <- me_resources_import_rdf(
 Generate or download RDF/JSON bundles (paths match OpenAPI: `resources/write_json{projectId}`, etc.):
 
 ```r
-gen_json <- me_resources_write_json(idno = "123")
+gen_json <- me_resource_write_json(idno = "123")
 
-gen_rdf <- me_resources_write_rdf(idno = "123")
+gen_rdf <- me_resource_write_rdf(idno = "123")
 
-rdf_dl <- me_resources_rdf(idno = "123", as_text = TRUE)
+rdf_dl <- me_resource_rdf(idno = "123", as_text = TRUE)
 
 if (!is.null(rdf_dl$content_type)) {
   message(paste("Content-Type:", rdf_dl$content_type))

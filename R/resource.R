@@ -5,7 +5,7 @@
 #' @return List of external resources
 #' @param idno Project IDNo
 #' @export
-me_resources_list <- function(idno, api_key=NULL, api_base_url=NULL){
+me_resource_list <- function(idno, api_key=NULL, api_base_url=NULL){
   
   if(is.null(api_key)){
     api_key=me_get_api_key();
@@ -103,12 +103,14 @@ me_resources_list <- function(idno, api_key=NULL, api_base_url=NULL){
 #' @param abstract  Resource abstract
 #' @param toc Table of contents
 #' @param file_path File path for uploading
-#'
-#'
-#'
+#' @param overwrite Optional logical. When a resource already uses the same stored
+#'   filename for this project, pass \code{TRUE} to replace that resource row,
+#'   or \code{FALSE} to keep default validation (duplicate filename error).
+#'   Omit to omit the field (same as \code{FALSE}). Must be a single non-missing
+#'   \code{TRUE} or \code{FALSE} when supplied.
 #'
 #' @export
-me_resources_add <- function(
+me_resource_add <- function(
     idno,
     dctype,
     title,
@@ -126,7 +128,7 @@ me_resources_add <- function(
     toc=NULL,
     subjects=NULL,
     file_path=NULL,
-    #overwrite="no",
+    overwrite=NULL,
     api_key=NULL,
     api_base_url=NULL){
   
@@ -151,8 +153,14 @@ me_resources_add <- function(
     abstract=abstract,
     toc=toc,
     subjects=subjects
-    #overwrite=overwrite
   )
+
+  if (!is.null(overwrite)) {
+    if (!is.logical(overwrite) || length(overwrite) != 1L || is.na(overwrite)) {
+      stop("overwrite must be a single TRUE or FALSE", call. = FALSE)
+    }
+    options$overwrite <- overwrite
+  }
   
   if (!is.null(file_path) && file.exists(file_path)){
     options$file=upload_file(file_path)
@@ -210,7 +218,7 @@ me_resources_add <- function(
 #'
 #'
 #' @export
-me_resources_update <- function(
+me_resource_update <- function(
     idno,
     resource_id,
     dctype=NULL,
@@ -294,7 +302,7 @@ me_resources_update <- function(
 #' @param idno Project IDNo
 #' @param resource_id Resource ID
 #' @export
-me_resources_delete <- function(idno, resource_id, api_key=NULL, api_base_url=NULL){
+me_resource_delete <- function(idno, resource_id, api_key=NULL, api_base_url=NULL){
   
   if(is.null(api_key)){
     api_key=me_get_api_key();
@@ -330,7 +338,7 @@ me_resources_delete <- function(idno, resource_id, api_key=NULL, api_base_url=NU
 #' @param skip_uploads TRUE/FALSE - If TRUE, won't upload files
 #' @param overwrite yes/no - Overwrite existing resources
 #' @export
-me_resources_import_rdf <- function(
+me_resource_import_rdf <- function(
     idno,
     rdf_file,
     api_key=NULL,
@@ -375,7 +383,7 @@ me_resources_import_rdf <- function(
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #' @return list
 #' @export
-me_resources_write_json <- function(idno, api_key=NULL, api_base_url=NULL){
+me_resource_write_json <- function(idno, api_key=NULL, api_base_url=NULL){
   if(is.null(api_key)){
     api_key=me_get_api_key();
   }
@@ -409,7 +417,7 @@ me_resources_write_json <- function(idno, api_key=NULL, api_base_url=NULL){
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #' @return list
 #' @export
-me_resources_write_rdf <- function(idno, api_key=NULL, api_base_url=NULL){
+me_resource_write_rdf <- function(idno, api_key=NULL, api_base_url=NULL){
   if(is.null(api_key)){
     api_key=me_get_api_key();
   }
@@ -444,7 +452,7 @@ me_resources_write_rdf <- function(idno, api_key=NULL, api_base_url=NULL){
 #' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #' @return list
 #' @export
-me_resources_rdf <- function(idno, as_text=TRUE, api_key=NULL, api_base_url=NULL){
+me_resource_rdf <- function(idno, as_text=TRUE, api_key=NULL, api_base_url=NULL){
   if(is.null(api_key)){
     api_key=me_get_api_key();
   }

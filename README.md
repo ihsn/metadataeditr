@@ -136,14 +136,14 @@ Short reference for package exports. Paths and payloads match the Editor OpenAPI
 
 | Function | Description |
 |----------|-------------|
-| `me_resources_list` | List external resources for a project |
-| `me_resources_add` | Create resource (optional file path or URL) |
-| `me_resources_update` | Update existing resource row |
-| `me_resources_delete` | Delete resource |
-| `me_resources_import_rdf` | Import resources from RDF/XML via multipart upload |
-| `me_resources_write_json` | Trigger JSON export/generation for resources |
-| `me_resources_write_rdf` | Trigger RDF generation for resources |
-| `me_resources_rdf` | Download RDF body (text or raw) |
+| `me_resource_list` | List external resources for a project |
+| `me_resource_add` | Create resource (optional file path or URL); optional `overwrite` (`TRUE`/`FALSE`) replaces an existing resource with the same stored filename when `TRUE` |
+| `me_resource_update` | Update existing resource row |
+| `me_resource_delete` | Delete resource |
+| `me_resource_import_rdf` | Import resources from RDF/XML via multipart upload |
+| `me_resource_write_json` | Trigger JSON export/generation for resources |
+| `me_resource_write_rdf` | Trigger RDF generation for resources |
+| `me_resource_rdf` | Download RDF body (text or raw) |
 
 ### Uploads (resumable / chunked API)
 
