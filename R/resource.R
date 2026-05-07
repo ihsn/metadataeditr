@@ -5,16 +5,16 @@
 #' @return List of external resources
 #' @param idno Project IDNo
 #' @export
-resources_list <- function(idno, api_key=NULL, api_base_url=NULL){
+me_resources_list <- function(idno, api_key=NULL, api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   endpoint=paste0('resources/',idno)
-  url=get_api_url(endpoint)
+  url=me_get_api_url(endpoint)
   
-  httpResponse <- GET(url, add_headers("X-API-KEY" = api_key), accept_json(), verbose(get_verbose()))
+  httpResponse <- GET(url, add_headers("X-API-KEY" = api_key), accept_json(), verbose(me_get_verbose()))
   output=NULL
   
   if(httpResponse$status_code!=200){
@@ -23,7 +23,7 @@ resources_list <- function(idno, api_key=NULL, api_base_url=NULL){
   
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"=metadataedit_http_response_json(httpResponse)
+    "response"=me_metadataedit_http_response_json(httpResponse)
   )
   
   return (output)
@@ -57,16 +57,16 @@ resources_list <- function(idno, api_key=NULL, api_base_url=NULL){
 #   endpoint=paste0('files/',idno,'/', resource_type)
 #   
 #   if(is.null(api_key)){
-#     api_key=get_api_key();
+#     api_key=me_get_api_key();
 #   }
 #   
-#   url=get_api_url(endpoint)
+#   url=me_get_api_url(endpoint)
 #   
 #   options=list(
 #     "file"=upload_file(file)
 #   )
 #   
-#   httpResponse <- POST(url, add_headers("X-API-KEY" = api_key),body=options, accept_json(), verbose(get_verbose()))
+#   httpResponse <- POST(url, add_headers("X-API-KEY" = api_key),body=options, accept_json(), verbose(me_get_verbose()))
 #   output=NULL
 #   
 #   if(httpResponse$status_code!=200){
@@ -75,7 +75,7 @@ resources_list <- function(idno, api_key=NULL, api_base_url=NULL){
 #   
 #   output=list(
 #     "status_code"=httpResponse$status_code,
-#     "response"= metadataedit_http_response_json(httpResponse)
+#     "response"= me_metadataedit_http_response_json(httpResponse)
 #   )
 #   
 #   return (output)
@@ -108,7 +108,7 @@ resources_list <- function(idno, api_key=NULL, api_base_url=NULL){
 #'
 #'
 #' @export
-resources_add <- function(
+me_resources_add <- function(
     idno,
     dctype,
     title,
@@ -131,7 +131,7 @@ resources_add <- function(
     api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   options=list(
@@ -157,17 +157,17 @@ resources_add <- function(
   if (!is.null(file_path) && file.exists(file_path)){
     options$file=upload_file(file_path)
   }
-  else if(!is.null(file_path) && is_valid_url(file_path)){
+  else if(!is.null(file_path) && me_is_valid_url(file_path)){
     options[['filename']]=file_path
   }
   
-  url=get_api_url(paste0('resources/',idno))
+  url=me_get_api_url(paste0('resources/',idno))
   print(url)
   httpResponse <- POST(url,
                        add_headers("X-API-KEY" = api_key),
                        body=options,
                        accept_json(),
-                       verbose(get_verbose()))
+                       verbose(me_get_verbose()))
   
   output=NULL
   
@@ -177,7 +177,7 @@ resources_add <- function(
   
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"=metadataedit_http_response_json(httpResponse)
+    "response"=me_metadataedit_http_response_json(httpResponse)
   )
   
   return (output)
@@ -210,7 +210,7 @@ resources_add <- function(
 #'
 #'
 #' @export
-resources_update <- function(
+me_resources_update <- function(
     idno,
     resource_id,
     dctype=NULL,
@@ -233,7 +233,7 @@ resources_update <- function(
     api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   options=list(
@@ -258,17 +258,17 @@ resources_update <- function(
   if (!is.null(file_path) && file.exists(file_path)){
     options$file=upload_file(file_path)
   }
-  else if(!is.null(file_path) && is_valid_url(file_path)){
+  else if(!is.null(file_path) && me_is_valid_url(file_path)){
     options[['filename']]=file_path
   }
   
-  url=get_api_url(paste0('resources/',idno, "/", resource_id))
+  url=me_get_api_url(paste0('resources/',idno, "/", resource_id))
   print(url)
   httpResponse <- POST(url,
                        add_headers("X-API-KEY" = api_key),
                        body=options,
                        accept_json(),
-                       verbose(get_verbose()))
+                       verbose(me_get_verbose()))
   
   output=NULL
   
@@ -278,7 +278,7 @@ resources_update <- function(
   
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"=metadataedit_http_response_json(httpResponse)
+    "response"=me_metadataedit_http_response_json(httpResponse)
   )
   
   return (output)
@@ -294,16 +294,16 @@ resources_update <- function(
 #' @param idno Project IDNo
 #' @param resource_id Resource ID
 #' @export
-resources_delete <- function(idno, resource_id, api_key=NULL, api_base_url=NULL){
+me_resources_delete <- function(idno, resource_id, api_key=NULL, api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   endpoint=paste0('resources/delete/',idno,'/',resource_id)
-  url=get_api_url(endpoint)
+  url=me_get_api_url(endpoint)
   
-  httpResponse <- POST(url, add_headers("X-API-KEY" = api_key), accept_json(), verbose(get_verbose()))
+  httpResponse <- POST(url, add_headers("X-API-KEY" = api_key), accept_json(), verbose(me_get_verbose()))
   output=NULL
   
   if(httpResponse$status_code!=200){
@@ -312,7 +312,7 @@ resources_delete <- function(idno, resource_id, api_key=NULL, api_base_url=NULL)
   
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"= metadataedit_http_response_json(httpResponse)
+    "response"= me_metadataedit_http_response_json(httpResponse)
   )
   
   return (output)
@@ -330,7 +330,7 @@ resources_delete <- function(idno, resource_id, api_key=NULL, api_base_url=NULL)
 #' @param skip_uploads TRUE/FALSE - If TRUE, won't upload files
 #' @param overwrite yes/no - Overwrite existing resources
 #' @export
-resources_import_rdf <- function(
+me_resources_import_rdf <- function(
     idno,
     rdf_file,
     api_key=NULL,
@@ -338,10 +338,10 @@ resources_import_rdf <- function(
 ){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
-  url=get_api_url(paste0('resources/import/',idno))
+  url=me_get_api_url(paste0('resources/import/',idno))
   
   options=list(
     "file"=upload_file(rdf_file)
@@ -350,7 +350,7 @@ resources_import_rdf <- function(
   print(url)
   
   
-  httpResponse <- POST(url, add_headers("X-API-KEY" = api_key),body=options, accept_json(), verbose(get_verbose()))
+  httpResponse <- POST(url, add_headers("X-API-KEY" = api_key),body=options, accept_json(), verbose(me_get_verbose()))
   output=NULL
   
   if(httpResponse$status_code!=200){
@@ -359,8 +359,114 @@ resources_import_rdf <- function(
   
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"= metadataedit_http_response_json(httpResponse)
+    "response"= me_metadataedit_http_response_json(httpResponse)
   )
   
   return (output)
+}
+
+
+#' Generate JSON for resources
+#'
+#' Calls the resources JSON generation endpoint for a project.
+#'
+#' @param idno Project IDNo
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
+#' @return list
+#' @export
+me_resources_write_json <- function(idno, api_key=NULL, api_base_url=NULL){
+  if(is.null(api_key)){
+    api_key=me_get_api_key();
+  }
+
+  endpoint <- paste0("resources/write_json", idno)
+  if(is.null(api_base_url)){
+    url=me_get_api_url(endpoint)
+  } else {
+    url = paste0(api_base_url,"/",endpoint)
+  }
+
+  httpResponse <- GET(url, add_headers("X-API-KEY" = api_key), accept_json(), verbose(me_get_verbose()))
+
+  if(httpResponse$status_code!=200){
+    warning(content(httpResponse, "text"))
+  }
+
+  list(
+    "status_code"=httpResponse$status_code,
+    "response"= me_metadataedit_http_response_json(httpResponse)
+  )
+}
+
+
+#' Generate RDF for resources
+#'
+#' Calls the resources RDF generation endpoint for a project.
+#'
+#' @param idno Project IDNo
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
+#' @return list
+#' @export
+me_resources_write_rdf <- function(idno, api_key=NULL, api_base_url=NULL){
+  if(is.null(api_key)){
+    api_key=me_get_api_key();
+  }
+
+  endpoint <- paste0("resources/write_rdf", idno)
+  if(is.null(api_base_url)){
+    url=me_get_api_url(endpoint)
+  } else {
+    url = paste0(api_base_url,"/",endpoint)
+  }
+
+  httpResponse <- GET(url, add_headers("X-API-KEY" = api_key), accept_json(), verbose(me_get_verbose()))
+
+  if(httpResponse$status_code!=200){
+    warning(content(httpResponse, "text"))
+  }
+
+  list(
+    "status_code"=httpResponse$status_code,
+    "response"= me_metadataedit_http_response_json(httpResponse)
+  )
+}
+
+
+#' Download RDF for resources
+#'
+#' Downloads RDF output for a project's resources.
+#'
+#' @param idno Project IDNo
+#' @param as_text Return body as text (TRUE) or raw bytes (FALSE). Default TRUE.
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
+#' @return list
+#' @export
+me_resources_rdf <- function(idno, as_text=TRUE, api_key=NULL, api_base_url=NULL){
+  if(is.null(api_key)){
+    api_key=me_get_api_key();
+  }
+
+  endpoint <- paste0("resources/rdf", idno)
+  if(is.null(api_base_url)){
+    url=me_get_api_url(endpoint)
+  } else {
+    url = paste0(api_base_url,"/",endpoint)
+  }
+
+  httpResponse <- GET(url, add_headers("X-API-KEY" = api_key), verbose(me_get_verbose()))
+
+  if(httpResponse$status_code!=200){
+    warning(content(httpResponse, "text"))
+  }
+
+  body <- if (as_text) content(httpResponse, as = "text", encoding = "UTF-8") else content(httpResponse, as = "raw")
+
+  list(
+    "status_code"=httpResponse$status_code,
+    "content_type"=headers(httpResponse)[["content-type"]],
+    "response"= body
+  )
 }

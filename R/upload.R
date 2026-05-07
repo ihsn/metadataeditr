@@ -3,27 +3,27 @@
 #' Returns the server's maximum chunk size, recommended chunk size, and maximum
 #' file size for resumable uploads.
 #'
-#' @param api_key API key (optional if set via set_api_key)
-#' @param api_base_url API base endpoint (optional if set via set_api_url)
+#' @param api_key API key (optional if set via me_set_api_key)
+#' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @examples
 #'
-#' upload_limits()
+#' me_upload_limits()
 #'
 #' @export
-upload_limits <- function(api_key=NULL, api_base_url=NULL) {
-  if (is.null(api_key)) api_key <- get_api_key()
+me_upload_limits <- function(api_key=NULL, api_base_url=NULL) {
+  if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (is.null(api_base_url)) {
-    url <- get_api_url("uploads/limits")
+    url <- me_get_api_url("upload/limits")
   } else {
-    url <- paste0(api_base_url, "/uploads/limits")
+    url <- paste0(api_base_url, "/upload/limits")
   }
 
   httpResponse <- GET(url,
                       add_headers("X-API-KEY" = api_key),
                       accept_json(),
-                      verbose(get_verbose()))
+                      verbose(me_get_verbose()))
 
   if (httpResponse$status_code != 200) {
     warning(content(httpResponse, "text"))
@@ -31,7 +31,7 @@ upload_limits <- function(api_key=NULL, api_base_url=NULL) {
 
   list(
     status_code = httpResponse$status_code,
-    response    = metadataedit_http_response_json(httpResponse)
+    response    = me_metadataedit_http_response_json(httpResponse)
   )
 }
 
@@ -41,28 +41,30 @@ upload_limits <- function(api_key=NULL, api_base_url=NULL) {
 #' Creates a new upload session on the server and returns an upload_id to use
 #' for subsequent chunk uploads.
 #'
+#' @param sid (required) Project ID/IDNO used by upload routes
 #' @param filename (required) Name of the file being uploaded
 #' @param total_size (required) Total file size in bytes
 #' @param chunk_size (required) Size of each chunk in bytes
 #' @param metadata Optional named list of additional metadata to store with the upload
-#' @param api_key API key (optional if set via set_api_key)
-#' @param api_base_url API base endpoint (optional if set via set_api_url)
+#' @param api_key API key (optional if set via me_set_api_key)
+#' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @return List with status_code and response (includes upload_id, upload_url, status_url)
 #'
 #' @export
-upload_init <- function(filename,
+me_upload_init <- function(sid,
+                        filename,
                         total_size,
                         chunk_size,
                         metadata=list(),
                         api_key=NULL,
                         api_base_url=NULL) {
-  if (is.null(api_key)) api_key <- get_api_key()
+  if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (is.null(api_base_url)) {
-    url <- get_api_url("uploads/init")
+    url <- me_get_api_url(paste0("upload/", sid))
   } else {
-    url <- paste0(api_base_url, "/uploads/init")
+    url <- paste0(api_base_url, "/upload/", sid)
   }
 
   total_chunks <- ceiling(total_size / chunk_size)
@@ -81,7 +83,7 @@ upload_init <- function(filename,
                        content_type_json(),
                        encode        = "json",
                        accept_json(),
-                       verbose(get_verbose()))
+                       verbose(me_get_verbose()))
 
   if (httpResponse$status_code != 200) {
     warning(content(httpResponse, "text"))
@@ -89,7 +91,7 @@ upload_init <- function(filename,
 
   list(
     status_code = httpResponse$status_code,
-    response    = metadataedit_http_response_json(httpResponse)
+    response    = me_metadataedit_http_response_json(httpResponse)
   )
 }
 
@@ -98,40 +100,43 @@ upload_init <- function(filename,
 #'
 #' Sends one binary chunk to the server for an active upload session.
 #'
-#' @param upload_id (required) Upload session ID returned by upload_init
+#' @param sid (required) Project ID/IDNO used by upload routes
+#' @param upload_id (required) Upload session ID returned by me_upload_init
 #' @param chunk_number (required) Zero-based chunk index
 #' @param chunk_data (required) Raw bytes for this chunk (use readBin)
 #' @param chunk_size (required) Size of the chunk in bytes (for server-side validation)
-#' @param api_key API key (optional if set via set_api_key)
-#' @param api_base_url API base endpoint (optional if set via set_api_url)
+#' @param api_key API key (optional if set via me_set_api_key)
+#' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
-#' @return List with status_code and response (includes upload_status and progress)
+#' @return List with status_code and response (includes me_upload_status and progress)
 #'
 #' @export
-upload_chunk <- function(upload_id,
+me_upload_chunk <- function(sid,
+                         upload_id,
                          chunk_number,
                          chunk_data,
                          chunk_size,
                          api_key=NULL,
                          api_base_url=NULL) {
-  if (is.null(api_key)) api_key <- get_api_key()
+  if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (is.null(api_base_url)) {
-    url <- get_api_url(paste0("uploads/chunk/", upload_id))
+    url <- me_get_api_url(paste0("upload/", sid))
   } else {
-    url <- paste0(api_base_url, "/uploads/chunk/", upload_id)
+    url <- paste0(api_base_url, "/upload/", sid)
   }
 
   httpResponse <- POST(url,
                        add_headers(
                          "X-API-KEY"            = api_key,
+                         "X-Upload-ID"           = as.character(upload_id),
                          "X-Upload-Chunk-Number" = as.character(chunk_number),
                          "X-Upload-Chunk-Size"   = as.character(chunk_size),
                          "Content-Type"          = "application/octet-stream"
                        ),
                        body   = chunk_data,
                        encode = "raw",
-                       verbose(get_verbose()))
+                       verbose(me_get_verbose()))
 
   if (httpResponse$status_code != 200) {
     warning(content(httpResponse, "text"))
@@ -139,7 +144,7 @@ upload_chunk <- function(upload_id,
 
   list(
     status_code = httpResponse$status_code,
-    response    = metadataedit_http_response_json(httpResponse)
+    response    = me_metadataedit_http_response_json(httpResponse)
   )
 }
 
@@ -149,28 +154,29 @@ upload_chunk <- function(upload_id,
 #' Returns the current progress, list of uploaded chunks, and overall status of
 #' an upload session.
 #'
+#' @param sid (required) Project ID/IDNO used by upload routes
 #' @param upload_id (required) Upload session ID
-#' @param api_key API key (optional if set via set_api_key)
-#' @param api_base_url API base endpoint (optional if set via set_api_url)
+#' @param api_key API key (optional if set via me_set_api_key)
+#' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @examples
 #'
-#' upload_status("abc123-upload-id")
+#' me_upload_status("PROJECT_IDNO", "abc123-upload-id")
 #'
 #' @export
-upload_status <- function(upload_id, api_key=NULL, api_base_url=NULL) {
-  if (is.null(api_key)) api_key <- get_api_key()
+me_upload_status <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
+  if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (is.null(api_base_url)) {
-    url <- get_api_url(paste0("uploads/status/", upload_id))
+    url <- me_get_api_url(paste0("upload/status/", sid, "/", upload_id))
   } else {
-    url <- paste0(api_base_url, "/uploads/status/", upload_id)
+    url <- paste0(api_base_url, "/upload/status/", sid, "/", upload_id)
   }
 
   httpResponse <- GET(url,
                       add_headers("X-API-KEY" = api_key),
                       accept_json(),
-                      verbose(get_verbose()))
+                      verbose(me_get_verbose()))
 
   if (httpResponse$status_code != 200) {
     warning(content(httpResponse, "text"))
@@ -178,7 +184,7 @@ upload_status <- function(upload_id, api_key=NULL, api_base_url=NULL) {
 
   list(
     status_code = httpResponse$status_code,
-    response    = metadataedit_http_response_json(httpResponse)
+    response    = me_metadataedit_http_response_json(httpResponse)
   )
 }
 
@@ -187,28 +193,29 @@ upload_status <- function(upload_id, api_key=NULL, api_base_url=NULL) {
 #'
 #' Cancels and removes an upload session and its temporary chunks from the server.
 #'
+#' @param sid (required) Project ID/IDNO used by upload routes
 #' @param upload_id (required) Upload session ID to delete
-#' @param api_key API key (optional if set via set_api_key)
-#' @param api_base_url API base endpoint (optional if set via set_api_url)
+#' @param api_key API key (optional if set via me_set_api_key)
+#' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @examples
 #'
-#' upload_delete("abc123-upload-id")
+#' me_upload_delete("PROJECT_IDNO", "abc123-upload-id")
 #'
 #' @export
-upload_delete <- function(upload_id, api_key=NULL, api_base_url=NULL) {
-  if (is.null(api_key)) api_key <- get_api_key()
+me_upload_delete <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
+  if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (is.null(api_base_url)) {
-    url <- get_api_url(paste0("uploads/delete/", upload_id))
+    url <- me_get_api_url(paste0("upload/", sid, "/", upload_id))
   } else {
-    url <- paste0(api_base_url, "/uploads/delete/", upload_id)
+    url <- paste0(api_base_url, "/upload/", sid, "/", upload_id)
   }
 
   httpResponse <- DELETE(url,
                          add_headers("X-API-KEY" = api_key),
                          accept_json(),
-                         verbose(get_verbose()))
+                         verbose(me_get_verbose()))
 
   if (httpResponse$status_code != 200) {
     warning(content(httpResponse, "text"))
@@ -216,7 +223,7 @@ upload_delete <- function(upload_id, api_key=NULL, api_base_url=NULL) {
 
   list(
     status_code = httpResponse$status_code,
-    response    = metadataedit_http_response_json(httpResponse)
+    response    = me_metadataedit_http_response_json(httpResponse)
   )
 }
 
@@ -227,17 +234,18 @@ upload_delete <- function(upload_id, api_key=NULL, api_base_url=NULL) {
 #' Already-uploaded chunks are skipped automatically, making the upload resumable
 #' if interrupted.
 #'
-#' The chunk size defaults to 10 MB. You can override it or call \code{upload_limits()}
+#' The chunk size defaults to 10 MB. You can override it or call \code{me_upload_limits()}
 #' first to fetch the server's recommended chunk size.
 #'
+#' @param sid (required) Project ID/IDNO used by upload routes
 #' @param file_path (required) Path to the local file to upload
 #' @param chunk_size Chunk size in bytes. Defaults to 10 MB (10485760)
 #' @param metadata Optional named list of metadata to store with the upload session
 #' @param resume_upload_id Upload session ID to resume a previous upload. If NULL a new
 #'   session is initialized automatically.
 #' @param show_progress Print progress to the console (TRUE/FALSE). Default TRUE.
-#' @param api_key API key (optional if set via set_api_key)
-#' @param api_base_url API base endpoint (optional if set via set_api_url)
+#' @param api_key API key (optional if set via me_set_api_key)
+#' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @return List with:
 #'   \itemize{
@@ -249,29 +257,35 @@ upload_delete <- function(upload_id, api_key=NULL, api_base_url=NULL) {
 #' @examples
 #'
 #' # Basic usage
-#' result <- upload_file_chunked(file_path = "/path/to/large-file.zip")
+#' result <- me_upload_file_chunked(
+#'   sid       = "PROJECT_IDNO",
+#'   file_path = "/path/to/large-file.zip"
+#' )
 #'
 #' # Use a custom 5 MB chunk size
-#' result <- upload_file_chunked(
+#' result <- me_upload_file_chunked(
+#'   sid        = "PROJECT_IDNO",
 #'   file_path  = "/path/to/large-file.zip",
 #'   chunk_size = 5242880
 #' )
 #'
 #' # Resume an interrupted upload
-#' result <- upload_file_chunked(
+#' result <- me_upload_file_chunked(
+#'   sid              = "PROJECT_IDNO",
 #'   file_path        = "/path/to/large-file.zip",
 #'   resume_upload_id = "abc123-upload-id"
 #' )
 #'
 #' @export
-upload_file_chunked <- function(file_path,
+me_upload_file_chunked <- function(sid,
+                                file_path,
                                 chunk_size=10485760,
                                 metadata=list(),
                                 resume_upload_id=NULL,
                                 show_progress=TRUE,
                                 api_key=NULL,
                                 api_base_url=NULL) {
-  if (is.null(api_key)) api_key <- get_api_key()
+  if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (!file.exists(file_path)) {
     stop(paste("File not found:", file_path))
@@ -286,7 +300,7 @@ upload_file_chunked <- function(file_path,
   chunks_done    <- c()
 
   if (!is.null(upload_id)) {
-    status_result <- upload_status(upload_id, api_key=api_key, api_base_url=api_base_url)
+    status_result <- me_upload_status(sid, upload_id, api_key=api_key, api_base_url=api_base_url)
     if (status_result$status_code == 200) {
       chunks_done <- as.integer(status_result$response$uploaded_chunks)
       if (show_progress) {
@@ -300,7 +314,8 @@ upload_file_chunked <- function(file_path,
   }
 
   if (is.null(upload_id)) {
-    init_result <- upload_init(
+    init_result <- me_upload_init(
+      sid          = sid,
       filename     = filename,
       total_size   = total_size,
       chunk_size   = chunk_size,
@@ -345,7 +360,8 @@ upload_file_chunked <- function(file_path,
 
     if (length(chunk_data) == 0) break
 
-    result <- upload_chunk(
+    result <- me_upload_chunk(
+      sid          = sid,
       upload_id    = upload_id,
       chunk_number = chunk_number,
       chunk_data   = chunk_data,

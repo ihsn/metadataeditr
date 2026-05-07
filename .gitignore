@@ -2,4 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-examples
+
+# Ignore secrets in examples
+examples/.Renviron

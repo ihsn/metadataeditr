@@ -8,7 +8,7 @@
 #' @param file_dir_jpg \strong{(optional)} file directory to store jpg. If empty, file will be stored in same folder as pdf
 #' @param dpi set image resolution in dpi, default is 72 dpi
 #' @export
-capture_pdf_cover <- function(file_path, file_name_jpg = NULL,
+me_capture_pdf_cover <- function(file_path, file_name_jpg = NULL,
                               file_dir_jpg = NULL, dpi = 72) {
 
   if (!file.exists(file_path)){
@@ -63,7 +63,7 @@ capture_pdf_cover <- function(file_path, file_name_jpg = NULL,
 #' @return TRUE or FALSE
 #'
 #' @export
-is_valid_url <- function(url){
+me_is_valid_url <- function(url){
 
   if(startsWith(url, 'http://')  ||
      startsWith(url, 'https://') ||
@@ -84,19 +84,19 @@ is_valid_url <- function(url){
 #' @return http request output
 #'
 #' @export
-metadataedit_http_get <- function(
+me_metadataedit_http_get <- function(
   url,
   options=list(),
   api_key=NULL,
   api_base_url=NULL){
 
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
 
-  url=get_api_url(paste0(url))
+  url=me_get_api_url(paste0(url))
   print(url)
-  httpResponse <- GET(url, add_headers("X-API-KEY" = api_key), body=options, verbose(get_verbose()) )
+  httpResponse <- GET(url, add_headers("X-API-KEY" = api_key), body=options, verbose(me_get_verbose()) )
 
   output=NULL
 
@@ -115,23 +115,55 @@ metadataedit_http_get <- function(
 
 #' Make an http POST request
 #'
-#' @param url
+#' @param url Endpoint path segment (appended to configured API base URL).
+#' @param options Body passed to \code{httr::POST} (\code{body} argument).
+#' @param encode How to encode the body: \code{"json"}, \code{"form"},
+#'   \code{"multipart"}, or \code{"raw"} (see \code{httr::POST} \code{encode}).
+#'   Default \code{"json"} matches \code{\link{me_metadataedit_http_put}}.
+#'   For JSON, \code{content_type_json()}, \code{encode = "json"}, and
+#'   \code{accept_json()} are applied for consistency with other package callers.
+#' @param api_key API key (optional if set via \code{\link{me_set_api_key}}).
+#' @param api_base_url Reserved for parity with other helpers; base URL comes
+#'   from \code{\link{me_get_api_url}}.
 #'
-#' @return http request output
+#' @return \code{httr} response object
 #'
 #' @export
-metadataedit_http_post <- function(
+me_metadataedit_http_post <- function(
   url,
   options=list(),
+  encode="json",
   api_key=NULL,
   api_base_url=NULL){
 
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
 
-  url=get_api_url(paste0(url))
-  httpResponse <- POST(url, add_headers("X-API-KEY" = api_key), body=options)
+  url=me_get_api_url(paste0(url))
+
+  if (identical(encode, "json")) {
+    httpResponse <- POST(url,
+                         add_headers("X-API-KEY" = api_key),
+                         body=options,
+                         content_type_json(),
+                         encode="json",
+                         accept_json(),
+                         verbose(me_get_verbose()))
+  } else if (identical(encode, "raw")) {
+    httpResponse <- POST(url,
+                         add_headers("X-API-KEY" = api_key),
+                         body=options,
+                         encode="raw",
+                         verbose(me_get_verbose()))
+  } else {
+    httpResponse <- POST(url,
+                         add_headers("X-API-KEY" = api_key),
+                         body=options,
+                         encode=encode,
+                         accept_json(),
+                         verbose(me_get_verbose()))
+  }
 
   if(httpResponse$status_code!=200){
     warning(content(httpResponse, "text"))
@@ -151,7 +183,7 @@ metadataedit_http_post <- function(
 #' request_encode = c("multipart", "form", "json", "raw")
 #'
 #' @export
-metadataedit_http_put <- function(
+me_metadataedit_http_put <- function(
   url,
   options=list(),
   request_encode="json",
@@ -159,10 +191,10 @@ metadataedit_http_put <- function(
   api_base_url=NULL){
 
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
 
-  url=get_api_url(paste0(url))
+  url=me_get_api_url(paste0(url))
   httpResponse <- PUT(url, add_headers("X-API-KEY" = api_key), body=options, encode=request_encode)
 
   if(httpResponse$status_code!=200){
@@ -181,17 +213,17 @@ metadataedit_http_put <- function(
 #' @return http request output
 #'
 #' @export
-metadataedit_http_delete <- function(
+me_metadataedit_http_delete <- function(
   url,
   options=list(),
   api_key=NULL,
   api_base_url=NULL){
 
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
 
-  url=get_api_url(paste0(url))
+  url=me_get_api_url(paste0(url))
   httpResponse <- DELETE(url, add_headers("X-API-KEY" = api_key), body=options)
 
   if(httpResponse$status_code!=200){
@@ -202,7 +234,7 @@ metadataedit_http_delete <- function(
 }
 
 
-metadataedit_http_response_json <- function(httpResponse)
+me_metadataedit_http_response_json <- function(httpResponse)
 {
   result<- tryCatch(
     {

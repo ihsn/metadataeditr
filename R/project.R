@@ -9,13 +9,13 @@
 #' @param filter_collection Filter by collections e.g. c(1,2,3)
 #' @param limit Limit number of search entries. Default is 100
 #' @param offset Starting row number for pagination
-#' @param api_key API key (optional if API key is set using set_api_key)
-#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #'
 #' @examples
 #'
 #'
-#' list_projects (
+#' me_list_projects (
 #'   keywords="some keywords or project IDNO",
 #'   filter_type = c("survey","timeseries"),
 #'   filter_collection = c(1,2)
@@ -26,7 +26,7 @@
 #'
 #'
 #' @export
-list_projects <- function(
+me_list_projects <- function(
     keywords=NULL,
     filter_type=c(),
     filter_collection=c(),
@@ -36,7 +36,7 @@ list_projects <- function(
     api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   search_params=NULL
@@ -81,7 +81,7 @@ list_projects <- function(
   print(endpoint)
   
   if(is.null(api_base_url)){
-    url=get_api_url(endpoint=endpoint)
+    url=me_get_api_url(endpoint=endpoint)
   } else {
     url = paste0(api_base_url,"/",endpoint)
   }
@@ -91,7 +91,7 @@ list_projects <- function(
                       content_type_json(),
                       encode="json",
                       accept_json(),
-                      verbose(get_verbose()))
+                      verbose(me_get_verbose()))
   
   output=NULL
   
@@ -101,7 +101,7 @@ list_projects <- function(
   
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"= metadataedit_http_response_json(httpResponse)
+    "response"= me_metadataedit_http_response_json(httpResponse)
   )
   
   return (output)
@@ -122,13 +122,13 @@ list_projects <- function(
 #' @param collection_ids List of collection IDs to assign to project
 #' @param overwrite Overwrite an existing project? TRUE | FALSE
 #' @param template_uid UID of the form template to assign to the project
-#' @param api_key API key (optional if API key is set using set_api_key)
-#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #'
 #' @examples
 #'
 #'
-#' create_project (
+#' me_create_project (
 #'   type="survey",
 #'   idno = "unique-idno-for-project",
 #'   metadata = list()
@@ -138,7 +138,7 @@ list_projects <- function(
 #'
 #'
 #' @export
-create_project <- function(
+me_create_project <- function(
     type,
     idno,
     metadata,
@@ -150,7 +150,7 @@ create_project <- function(
     api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   
@@ -172,7 +172,7 @@ create_project <- function(
   # Create url
   endpoint <- paste0('editor/create/',type)
   if(is.null(api_base_url)){
-    url=get_api_url(endpoint=endpoint)
+    url=me_get_api_url(endpoint=endpoint)
   } else {
     url = paste0(api_base_url,"/",endpoint)
   }
@@ -185,7 +185,7 @@ create_project <- function(
                        content_type_json(),
                        encode="json",
                        accept_json(),
-                       verbose(get_verbose()))
+                       verbose(me_get_verbose()))
 
   if(httpResponse$status_code!=200){
     warning(content(httpResponse, "text"))
@@ -195,17 +195,17 @@ create_project <- function(
   
   #upload thumbnail
   if(!is.null(thumbnail) && file.exists(thumbnail)) {
-    thumbnail_result=thumbnail_upload(idno=idno,thumbnail = thumbnail)
+    thumbnail_result=me_thumbnail_upload(idno=idno,thumbnail = thumbnail)
   }
   
   #set default thumbnail
   if(!is.null(thumbnail) && thumbnail == 'default'){
-    thumbnail_result= thumbnail_delete(idno=idno)
+    thumbnail_result= me_thumbnail_delete(idno=idno)
   }
   
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"= metadataedit_http_response_json(httpResponse),
+    "response"= me_metadataedit_http_response_json(httpResponse),
     "thumbnail"=thumbnail_result
   )
   
@@ -224,13 +224,13 @@ create_project <- function(
 #' @param partial_update Update only partial metadata (TRUE/FALSE)
 #' @param thumbnail Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG
 #' @param collection_ids List of collection IDs to assign to project
-#' @param api_key API key (optional if API key is set using set_api_key)
-#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #'
 #' @examples
 #'
 #'
-#' update_project (
+#' me_update_project (
 #'   type="survey",
 #'   idno = "unique-idno-for-project",
 #'   metadata = list()
@@ -240,7 +240,7 @@ create_project <- function(
 #'
 #'
 #' @export
-update_project <- function(
+me_update_project <- function(
     type,
     idno,
     metadata,
@@ -251,7 +251,7 @@ update_project <- function(
     api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   if (partial_update==TRUE){
@@ -264,7 +264,7 @@ update_project <- function(
   endpoint <- paste0('editor/update/',type,"/",idno)
   
   if(is.null(api_base_url)){
-    url=get_api_url(endpoint=endpoint)
+    url=me_get_api_url(endpoint=endpoint)
   } else {
     url = paste0(api_base_url,"/",endpoint)
   }
@@ -275,7 +275,7 @@ update_project <- function(
                        content_type_json(),
                        encode="json",
                        accept_json(),
-                       verbose(get_verbose()))
+                       verbose(me_get_verbose()))
   
   output=NULL
   
@@ -287,17 +287,17 @@ update_project <- function(
   
   #upload thumbnail
   if(!is.null(thumbnail) && file.exists(thumbnail)) {
-    thumbnail_result=thumbnail_upload(idno=idno,thumbnail = thumbnail)
+    thumbnail_result=me_thumbnail_upload(idno=idno,thumbnail = thumbnail)
   }
   
   #set default thumbnail
   if(!is.null(thumbnail) && thumbnail == 'default'){
-    thumbnail_result= thumbnail_delete(idno=idno)
+    thumbnail_result= me_thumbnail_delete(idno=idno)
   }
   
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"= metadataedit_http_response_json(httpResponse),
+    "response"= me_metadataedit_http_response_json(httpResponse),
     "thumbnail"=thumbnail_result
   )
   
@@ -314,13 +314,13 @@ update_project <- function(
 #' @param type (required) Type of project - survey, geospatial, table, document, timeseries, timeseries-db, image, script, video
 #' @param idno (required) Project unique IDNO or numeric ID
 #' @param patches (required) List of JSON Patch operations (each a list with op, path, and optional value)
-#' @param api_key API key (optional if API key is set using set_api_key)
-#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #'
 #' @examples
 #'
 #'
-#' patch_project(
+#' me_patch_project(
 #'   type="document",
 #'   idno="project-document-idno-001",
 #'   patches=list(
@@ -333,7 +333,7 @@ update_project <- function(
 #'
 #'
 #' @export
-patch_project <- function(
+me_patch_project <- function(
     type,
     idno,
     patches=list(),
@@ -341,7 +341,7 @@ patch_project <- function(
     api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   if(length(patches)==0){
@@ -351,7 +351,7 @@ patch_project <- function(
   endpoint <- paste0('editor/patch/',type,'/',idno)
   
   if(is.null(api_base_url)){
-    url=get_api_url(endpoint=endpoint)
+    url=me_get_api_url(endpoint=endpoint)
   } else {
     url = paste0(api_base_url,"/",endpoint)
   }
@@ -362,7 +362,7 @@ patch_project <- function(
                        content_type_json(),
                        encode="json",
                        accept_json(),
-                       verbose(get_verbose()))
+                       verbose(me_get_verbose()))
   
   output=NULL
   
@@ -372,7 +372,7 @@ patch_project <- function(
   
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"= metadataedit_http_response_json(httpResponse)
+    "response"= me_metadataedit_http_response_json(httpResponse)
   )
   
   return (output)
@@ -387,8 +387,8 @@ patch_project <- function(
 #'
 #' @return NULL
 #' @param idno (required) Project unique identifier
-#' @param api_key API key (optional if API key is set using set_api_key)
-#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #'
 #' @examples
 #'
@@ -397,19 +397,19 @@ patch_project <- function(
 #' )
 #'
 #' @export
-project_by_idno <- function(
+me_project_by_idno <- function(
     idno,
     api_key=NULL,
     api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   endpoint <- paste0('editor/',idno)
   
   if(is.null(api_base_url)){
-    url=get_api_url(endpoint=endpoint)
+    url=me_get_api_url(endpoint=endpoint)
   } else {
     url = paste0(api_base_url,"/",endpoint)
   }
@@ -418,7 +418,7 @@ project_by_idno <- function(
   
   httpResponse <- GET(url, 
                       add_headers("X-API-KEY" = api_key),
-                      verbose(get_verbose())
+                      verbose(me_get_verbose())
                       )
                       
   
@@ -443,29 +443,29 @@ project_by_idno <- function(
 #'
 #' @return NULL
 #' @param id (required) Project numeric ID
-#' @param api_key API key (optional if API key is set using set_api_key)
-#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #'
 #' @examples
 #'
-#' project_by_id (
+#' me_project_by_id (
 #'   id=12
 #' )
 #'
 #' @export
-project_by_id <- function(
+me_project_by_id <- function(
     id,
     api_key=NULL,
     api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   endpoint <- paste0('editor/',id)
   
   if(is.null(api_base_url)){
-    url=get_api_url(endpoint=endpoint)
+    url=me_get_api_url(endpoint=endpoint)
   } else {
     url = paste0(api_base_url,"/",endpoint)
   }
@@ -474,7 +474,7 @@ project_by_id <- function(
   
   httpResponse <- GET(url, 
                       add_headers("X-API-KEY" = api_key),
-                      verbose(get_verbose())
+                      verbose(me_get_verbose())
   )
   
   
@@ -502,13 +502,13 @@ project_by_id <- function(
 #' @return NULL
 #' @param type (required) Type of project - survey, geospatial, table, document, timeseries
 #' @param file_path Path to project file. Supported types are DDI/XML, JSON or project package zip
-#' @param api_key API key (optional if API key is set using set_api_key)
-#' @param api_base_url API base endpoint (optional if API base endpoint is set using set_api_url)
+#' @param api_key API key (optional if API key is set using me_set_api_key)
+#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
 #'
 #' @examples
 #'
 #'
-#' import_project (
+#' me_import_project (
 #'   type="timeseries",
 #'   file_path = "/files/some-project.zip"
 #' )
@@ -517,7 +517,7 @@ project_by_id <- function(
 #'
 #'
 #' @export
-import_project <- function(
+me_import_project <- function(
     type,
     file_path,
     idno=NULL,
@@ -525,7 +525,7 @@ import_project <- function(
     api_base_url=NULL){
   
   if(is.null(api_key)){
-    api_key=get_api_key();
+    api_key=me_get_api_key();
   }
   
   
@@ -535,7 +535,7 @@ import_project <- function(
   # Create url
   endpoint <- paste0('importproject')
   if(is.null(api_base_url)){
-    url=get_api_url(endpoint=endpoint)
+    url=me_get_api_url(endpoint=endpoint)
   } else {
     url = paste0(api_base_url,"/",endpoint)
   }
@@ -553,7 +553,7 @@ import_project <- function(
   httpResponse <- POST(url,
                        add_headers("X-API-KEY" = api_key),
                        body=options,
-                       verbose(get_verbose()))
+                       verbose(me_get_verbose()))
   
   if(httpResponse$status_code!=200){
     warning(content(httpResponse, "text"))
@@ -562,7 +562,7 @@ import_project <- function(
 
   output=list(
     "status_code"=httpResponse$status_code,
-    "response"= metadataedit_http_response_json(httpResponse)
+    "response"= me_metadataedit_http_response_json(httpResponse)
   )
   
   return (output)

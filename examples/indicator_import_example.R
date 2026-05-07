@@ -21,7 +21,9 @@ set_api_url(Sys.getenv("METADATAEDITR_API_BASE_URL"))
 
 # Project ID of the indicator/timeseries project to import data into.
 # The DSD (data structure definition) must already be set up on the project.
-PROJECT_ID <- 885
+PROJECT_ID <- 5592
+#"ff516b5a-2a02-4dc9-9e94-296be944b524" 
+#885
 
 # Path to the CSV file to import
 CSV_FILE <- "example-indicators.csv"
@@ -36,7 +38,7 @@ CSV_FILE <- "example-indicators.csv"
 result <- import_indicator_data(
   project_id       = PROJECT_ID,
   csv_file         = CSV_FILE,
-  indicator_value  = "2113967",  # only import rows for this indicator code
+  indicator_value  = "21139",  # only import rows for this indicator code
   delimiter        = ",",
   timeout_seconds  = 1800,     # wait up to 30 minutes
   interval_seconds = 3        # check every 3 seconds

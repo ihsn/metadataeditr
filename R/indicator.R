@@ -8,22 +8,22 @@
 #' @param timeout_seconds Maximum time to wait in seconds. Default 1800 (30 min)
 #' @param interval_seconds Seconds between polling attempts. Default 5
 #' @param show_progress Print status messages to the console. Default TRUE
-#' @param api_key API key (optional if set via set_api_key)
-#' @param api_base_url API base endpoint (optional if set via set_api_url)
+#' @param api_key API key (optional if set via me_set_api_key)
+#' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @return List with \code{status_code} and \code{response} (the final job object)
 #'
 #' @export
-job_wait <- function(job_uuid,
+me_job_wait <- function(job_uuid,
                      timeout_seconds  = 1800,
                      interval_seconds = 5,
                      show_progress    = TRUE,
                      api_key          = NULL,
                      api_base_url     = NULL) {
-  if (is.null(api_key)) api_key <- get_api_key()
+  if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (is.null(api_base_url)) {
-    url <- get_api_url(paste0("jobs/", job_uuid))
+    url <- me_get_api_url(paste0("jobs/", job_uuid))
   } else {
     url <- paste0(api_base_url, "/jobs/", job_uuid)
   }
@@ -34,9 +34,9 @@ job_wait <- function(job_uuid,
     httpResponse <- GET(url,
                         add_headers("X-API-KEY" = api_key),
                         accept_json(),
-                        verbose(get_verbose()))
+                        verbose(me_get_verbose()))
 
-    body <- metadataedit_http_response_json(httpResponse)
+    body <- me_metadataedit_http_response_json(httpResponse)
 
     # The poll response is { status: "success", job: { status: "completed"|"failed"|..., ... } }
     # Read the job-level status, not the HTTP-response-level status.
@@ -73,7 +73,7 @@ job_wait <- function(job_uuid,
 
 # Used by indicator_import_job_submit. Integer NA is not is.numeric() in R, so it used to fall
 # through to as.character() -> "NA" in JSON and the API error IDNO-NOT-FOUND: NA.
-normalize_project_id_for_import_job <- function(project_id, arg_name = "project_id") {
+me_normalize_project_id_for_import_job <- function(project_id, arg_name = "project_id") {
   if (missing(project_id)) {
     stop(sprintf("%s is required", arg_name), call. = FALSE)
   }
@@ -83,7 +83,7 @@ normalize_project_id_for_import_job <- function(project_id, arg_name = "project_
   if (anyNA(project_id)) {
     stop(sprintf(
       paste0(
-        "%s is NA. Use a numeric project id (e.g. resp$response$project$id from create_project) ",
+        "%s is NA. Use a numeric project id (e.g. resp$response$project$id from me_create_project) ",
         "or a non-empty idno string."
       ),
       arg_name
@@ -118,39 +118,39 @@ normalize_project_id_for_import_job <- function(project_id, arg_name = "project_
 #' Submits a background job (\code{POST /api/jobs/import_indicator_data}) that
 #' loads a pre-uploaded CSV into the timeseries data store for an indicator or
 #' timeseries project.  The CSV must already be uploaded via
-#' \code{\link{upload_file_chunked}} before calling this function.
+#' \code{\link{me_upload_file_chunked}} before calling this function.
 #'
-#' Use \code{\link{import_indicator_data}} for a single call that handles upload,
+#' Use \code{\link{me_import_indicator_data}} for a single call that handles upload,
 #' job submission, and polling in one step.
 #'
 #' @param project_id      (required) Numeric project id or project idno (same as other editor APIs)
-#' @param upload_id       (required) Completed upload session ID from \code{upload_file_chunked}
+#' @param upload_id       (required) Completed upload session ID from \code{me_upload_file_chunked}
 #' @param indicator_value (required) The indicator code to import (e.g. \code{"NY.GDP.PCAP.CD"}).
 #'   Only rows whose indicator_id column matches this value will be imported.
 #' @param delimiter       CSV field delimiter character. Default \code{","}
 #' @param priority        Job queue priority. Default 0
-#' @param api_key API key (optional if set via set_api_key)
-#' @param api_base_url API base endpoint (optional if set via set_api_url)
+#' @param api_key API key (optional if set via me_set_api_key)
+#' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @return List with \code{status_code}, \code{uuid} and \code{response}
 #'
 #' @export
-indicator_import_job_submit <- function(project_id,
+me_indicator_import_job_submit <- function(project_id,
                                         upload_id,
                                         indicator_value,
                                         delimiter       = ",",
                                         priority        = 0,
                                         api_key         = NULL,
                                         api_base_url    = NULL) {
-  if (is.null(api_key)) api_key <- get_api_key()
+  if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (is.null(api_base_url)) {
-    url <- get_api_url("jobs/import_indicator_data")
+    url <- me_get_api_url("jobs/import_indicator_data")
   } else {
     url <- paste0(api_base_url, "/jobs/import_indicator_data")
   }
 
-  pid_json <- normalize_project_id_for_import_job(project_id)
+  pid_json <- me_normalize_project_id_for_import_job(project_id)
 
   prio <- suppressWarnings(as.integer(priority))
   if (length(prio) != 1L || is.na(prio)) {
@@ -174,13 +174,13 @@ indicator_import_job_submit <- function(project_id,
                        content_type_json(),
                        encode        = "json",
                        accept_json(),
-                       verbose(get_verbose()))
+                       verbose(me_get_verbose()))
 
   if (httpResponse$status_code != 201) {
     warning(content(httpResponse, "text"))
   }
 
-  resp <- metadataedit_http_response_json(httpResponse)
+  resp <- me_metadataedit_http_response_json(httpResponse)
 
   list(
     status_code = httpResponse$status_code,
@@ -198,8 +198,8 @@ indicator_import_job_submit <- function(project_id,
 #'
 #' The function:
 #' \enumerate{
-#'   \item Uploads the CSV using \code{\link{upload_file_chunked}}
-#'   \item Submits an \code{import_indicator_data} background job
+#'   \item Uploads the CSV using \code{\link{me_upload_file_chunked}}
+#'   \item Submits an \code{me_import_indicator_data} background job
 #'   \item Polls until the job completes (or fails / times out)
 #' }
 #'
@@ -212,8 +212,8 @@ indicator_import_job_submit <- function(project_id,
 #' @param timeout_seconds  Maximum seconds to wait for the import job. Default 1800 (30 min)
 #' @param interval_seconds Polling interval in seconds. Default 5
 #' @param show_progress    Print progress messages to the console. Default TRUE
-#' @param api_key API key (optional if set via set_api_key)
-#' @param api_base_url API base endpoint (optional if set via set_api_url)
+#' @param api_key API key (optional if set via me_set_api_key)
+#' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @return List with:
 #'   \itemize{
@@ -227,10 +227,10 @@ indicator_import_job_submit <- function(project_id,
 #' @examples
 #' \dontrun{
 #' # Set credentials once
-#' set_api("https://your-editor.example.org/index.php/api", api_key = "YOUR_KEY")
+#' me_set_api("https://your-editor.example.org/index.php/api", api_key = "YOUR_KEY")
 #'
 #' # Import data into an existing indicator project (ID 885)
-#' result <- import_indicator_data(
+#' result <- me_import_indicator_data(
 #'   project_id = 885,
 #'   csv_file   = "data/wdi_subset.csv"
 #' )
@@ -240,7 +240,7 @@ indicator_import_job_submit <- function(project_id,
 #' }
 #'
 #' @export
-import_indicator_data <- function(project_id,
+me_import_indicator_data <- function(project_id,
                                   csv_file,
                                   indicator_value,
                                   delimiter        = ",",
@@ -250,7 +250,7 @@ import_indicator_data <- function(project_id,
                                   show_progress    = TRUE,
                                   api_key          = NULL,
                                   api_base_url     = NULL) {
-  if (is.null(api_key)) api_key <- get_api_key()
+  if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (!file.exists(csv_file)) {
     stop(paste("CSV file not found:", csv_file))
@@ -262,7 +262,7 @@ import_indicator_data <- function(project_id,
     message(sprintf("Uploading %s ...", basename(csv_file)))
   }
 
-  upload_result <- upload_file_chunked(
+  upload_result <- me_upload_file_chunked(
     file_path     = csv_file,
     chunk_size    = chunk_size,
     show_progress = show_progress,
@@ -286,7 +286,7 @@ import_indicator_data <- function(project_id,
     message("Submitting import job ...")
   }
 
-  job_result <- indicator_import_job_submit(
+  job_result <- me_indicator_import_job_submit(
     project_id      = project_id,
     upload_id       = upload_id,
     indicator_value = indicator_value,
@@ -311,7 +311,7 @@ import_indicator_data <- function(project_id,
 
   # ── Step 3: Poll until done ────────────────────────────────────────────────
 
-  poll_result <- job_wait(
+  poll_result <- me_job_wait(
     job_uuid         = job_uuid,
     timeout_seconds  = timeout_seconds,
     interval_seconds = interval_seconds,
