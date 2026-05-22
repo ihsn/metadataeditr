@@ -212,6 +212,8 @@ me_indicator_import_job_submit <- function(project_id,
 #' @param timeout_seconds  Maximum seconds to wait for the import job. Default 1800 (30 min)
 #' @param interval_seconds Polling interval in seconds. Default 5
 #' @param show_progress    Print progress messages to the console. Default TRUE
+#' @param check_import_ready If \code{TRUE}, call \code{\link{me_indicator_dsd_binding}}
+#'   before upload and stop when \code{import_ready} is false. Default \code{TRUE}.
 #' @param api_key API key (optional if set via me_set_api_key)
 #' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
@@ -248,12 +250,29 @@ me_import_indicator_data <- function(project_id,
                                   timeout_seconds  = 1800,
                                   interval_seconds = 5,
                                   show_progress    = TRUE,
+                                  check_import_ready = TRUE,
                                   api_key          = NULL,
                                   api_base_url     = NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
   if (!file.exists(csv_file)) {
     stop(paste("CSV file not found:", csv_file))
+  }
+
+  if (isTRUE(check_import_ready)) {
+    binding <- me_indicator_dsd_binding(
+      project_id,
+      api_key = api_key,
+      api_base_url = api_base_url
+    )
+    if (binding$status_code != 200) {
+      stop("Could not read DSD binding (HTTP ", binding$status_code, ")", call. = FALSE)
+    }
+    if (!isTRUE(binding$response$import_ready)) {
+      reasons <- binding$response$import_blocked_reasons
+      msg <- if (length(reasons)) paste(reasons, collapse = "; ") else "import not ready"
+      stop("Project is not ready for data import: ", msg, call. = FALSE)
+    }
   }
 
   # ── Step 1: Upload the CSV ─────────────────────────────────────────────────
@@ -263,6 +282,7 @@ me_import_indicator_data <- function(project_id,
   }
 
   upload_result <- me_upload_file_chunked(
+    sid           = project_id,
     file_path     = csv_file,
     chunk_size    = chunk_size,
     show_progress = show_progress,

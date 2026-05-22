@@ -30,59 +30,6 @@ me_resource_list <- function(idno, api_key=NULL, api_base_url=NULL){
 }
 
 
-#' Editor upload external resource file
-#'
-#' Upload an external resource file
-#'
-#' @return NULL
-#' @param idno Project IDNo
-#' @param file External resource file to be uploaded
-#' @param resource_type Resource type - documentation, data
-#' @export
-# resources_upload <- function(
-#     idno,
-#     resource_id,
-#     file,
-#     resource_type='documentation',
-#     api_key=NULL,
-#     api_base_url=NULL){
-#   
-#   
-#   valid_resource_types=c("documentation","data")
-#   
-#   if (!resource_type %in% valid_resource_types){
-#     stop(paste("Supported resource types are:",valid_resource_types))
-#   }
-#   
-#   endpoint=paste0('files/',idno,'/', resource_type)
-#   
-#   if(is.null(api_key)){
-#     api_key=me_get_api_key();
-#   }
-#   
-#   url=me_get_api_url(endpoint)
-#   
-#   options=list(
-#     "file"=upload_file(file)
-#   )
-#   
-#   httpResponse <- POST(url, add_headers("X-API-KEY" = api_key),body=options, accept_json(), verbose(me_get_verbose()))
-#   output=NULL
-#   
-#   if(httpResponse$status_code!=200){
-#     warning(content(httpResponse, "text"))
-#   }
-#   
-#   output=list(
-#     "status_code"=httpResponse$status_code,
-#     "response"= me_metadataedit_http_response_json(httpResponse)
-#   )
-#   
-#   return (output)
-# }
-
-
-
 #' Editor create new resource
 #'
 #' Create a new resource

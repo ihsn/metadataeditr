@@ -135,8 +135,10 @@ me_dcformats <-function() {
 me_ProjectTypes <- function() {
   list(
     "Microdata" = "survey",
-    "Timeseries"="timeseries",
-    "Timeseries database"="timeseries-db",
-    "Document"="document"
+    "Indicator" = "indicator",
+    "Timeseries" = "timeseries",
+    "Indicator database" = "indicator-db",
+    "Timeseries database" = "timeseries-db",
+    "Document" = "document"
   )
 }

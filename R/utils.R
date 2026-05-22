@@ -6,7 +6,7 @@
 #' @param file_path \strong{(required)} PDF file path
 #' @param file_name_jpg \strong{(optional)} file name to store jpg. If empty, file name of jpg is same as pdf
 #' @param file_dir_jpg \strong{(optional)} file directory to store jpg. If empty, file will be stored in same folder as pdf
-#' @param dpi set image resolution in dpi, default is 72 dpi
+#' @param dpi Image resolution in dots per inch. Default is 72.
 #' @export
 me_capture_pdf_cover <- function(file_path, file_name_jpg = NULL,
                               file_dir_jpg = NULL, dpi = 72) {
@@ -58,7 +58,7 @@ me_capture_pdf_cover <- function(file_path, file_name_jpg = NULL,
 
 #' Check string is a URL
 #'
-#' @param url
+#' @param url Character string to test as a URL.
 #'
 #' @return TRUE or FALSE
 #'
@@ -79,9 +79,13 @@ me_is_valid_url <- function(url){
 
 #' Make an http GET request
 #'
-#' @param url
+#' @param url API endpoint path segment (appended to configured base URL).
+#' @param options Named list passed as the request body.
+#' @param api_key API key (optional if set via \code{\link{me_set_api_key}}).
+#' @param api_base_url Reserved for parity with other helpers; base URL comes
+#'   from \code{\link{me_get_api_url}}.
 #'
-#' @return http request output
+#' @return List with \code{status_code} and \code{response}.
 #'
 #' @export
 me_metadataedit_http_get <- function(
@@ -175,12 +179,15 @@ me_metadataedit_http_post <- function(
 
 #' Make an http PUT request
 #'
-#' @param url
+#' @param url API endpoint path segment (appended to configured base URL).
+#' @param options Named list passed as the request body.
+#' @param request_encode Body encoding: \code{"multipart"}, \code{"form"},
+#'   \code{"json"}, or \code{"raw"}.
+#' @param api_key API key (optional if set via \code{\link{me_set_api_key}}).
+#' @param api_base_url Reserved for parity with other helpers; base URL comes
+#'   from \code{\link{me_get_api_url}}.
 #'
-#' @return http request output
-#'
-#'
-#' request_encode = c("multipart", "form", "json", "raw")
+#' @return \code{httr} response object.
 #'
 #' @export
 me_metadataedit_http_put <- function(
@@ -208,9 +215,13 @@ me_metadataedit_http_put <- function(
 
 #' Make an http DELETE request
 #'
-#' @param url
+#' @param url API endpoint path segment (appended to configured base URL).
+#' @param options Named list passed as the request body.
+#' @param api_key API key (optional if set via \code{\link{me_set_api_key}}).
+#' @param api_base_url Reserved for parity with other helpers; base URL comes
+#'   from \code{\link{me_get_api_url}}.
 #'
-#' @return http request output
+#' @return \code{httr} response object.
 #'
 #' @export
 me_metadataedit_http_delete <- function(
