@@ -234,3 +234,41 @@ if (!is.null(rdf_dl$content_type)) {
   message(paste("Content-Type:", rdf_dl$content_type))
 }
 ```
+
+## Indicator DSD workflow (global registry)
+
+Import a catalogue DSD, bind it to an indicator project, and publish CSV data:
+
+```r
+me_set_api("https://your-editor.example.org/index.php/api/", "YOUR_API_KEY")
+
+ds_ref <- me_data_structure_reference(
+  idno = "MY_DSD_V1", agency = "NADA", name = "MY_STRUCTURE", version = "1.0"
+)
+
+me_data_structure_import_json(payload = list(
+  data_structure = list(
+    idno = "MY_DSD_V1", name = "MY_STRUCTURE", agency = "NADA", version = "1.0",
+    components = list(
+      list(name = "REF_AREA", column_type = "geography", data_type = "string"),
+      list(name = "TIME_PERIOD", column_type = "time_period", data_type = "integer",
+           time_period_format = "YYYY"),
+      list(name = "INDICATOR", column_type = "indicator_id", data_type = "string"),
+      list(name = "OBS_VALUE", column_type = "observation_value", data_type = "double")
+    )
+  ),
+  dry_run = TRUE
+))
+
+me_create_project("indicator", "MY-IND-001", metadata = list(
+  series_description = list(idno = "MY-IND-001", name = "Example indicator")
+))
+
+me_indicator_dsd_bind("MY-IND-001", data_structure_reference = ds_ref, indicator_id_value = "CODE1")
+me_indicator_dsd_update_binding("MY-IND-001", implied_freq_code = "A")
+
+me_indicator_publish_data("MY-IND-001", csv_file = "data.csv")
+me_indicator_dsd_validate("MY-IND-001")
+```
+
+See the runnable script [`examples/indicator_dsd_full_workflow.R`](examples/indicator_dsd_full_workflow.R).

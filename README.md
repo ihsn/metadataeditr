@@ -44,6 +44,9 @@ Alternatively set URL and key separately: `me_set_api_url()`, `me_set_api_key()`
 
 For usage examples by area, see [`examples.md`](examples.md).
 
+For the full **global DSD → indicator project → bind → validate → upload** workflow, see
+[`examples/indicator_dsd_full_workflow.R`](examples/indicator_dsd_full_workflow.R).
+
 
 # Exported functions
 
@@ -85,13 +88,37 @@ Short reference for package exports. Paths and payloads match the Editor OpenAPI
 | `me_capture_pdf_cover` | Render first page of a PDF to a JPG cover |
 | `me_ProjectTypes` | Named mapping of UI labels to API project type strings |
 
+### Global data structures (DSD registry)
+
+| Function | Description |
+|----------|-------------|
+| `me_data_structure_reference` | Build `data_structure_reference` identity object |
+| `me_data_structure_import_json` | `POST /data_structures/import_json` (supports `dry_run`) |
+| `me_data_structure_validate` | `GET /data_structures/validate/{id}` |
+| `me_data_structure_list` | `GET /data_structures` |
+| `me_data_structure_get` | `GET /data_structures/single/{id}` |
+| `me_data_structure_export` | `GET /data_structures/export/{segment}` |
+
+### Indicator DSD (project binding, validation, data)
+
+| Function | Description |
+|----------|-------------|
+| `me_indicator_dsd_bind` | `POST /indicator_dsd/bind_global/{sid}` |
+| `me_indicator_dsd_update_binding` | Set `indicator_id_value` / `implied_freq_code` |
+| `me_indicator_dsd_binding` | Import readiness and structure validation summary |
+| `me_indicator_dsd_validate` | Structure + published data validation report |
+| `me_indicator_dsd_upload_prepare` | Multipart CSV stage + header validation |
+| `me_indicator_dsd_upload_import` | Import staged CSV into DuckDB timeseries |
+| `me_indicator_publish_data` | Prepare + import in one call |
+
 ### Indicator data & background jobs
 
 | Function | Description |
 |----------|-------------|
-| `me_upload_file_chunked` | Chunked upload of a CSV (and related flows) tied to a project `sid` |
-| `me_indicator_import_job_submit` | Queue `import_indicator_data` job after upload |
+| `me_upload_file_chunked` | Chunked upload of a CSV tied to a project `sid` |
+| `me_indicator_import_job_submit` | Queue `jobs/import_indicator_data` after upload |
 | `me_import_indicator_data` | Upload CSV, submit job, poll until terminal state |
+| `me_job_publish_to_nada` | Queue `jobs/publish_to_nada` (publish project to NADA catalog) |
 | `me_job_wait` | Poll `/jobs/{uuid}` until completed, failed, or timeout |
 
 ### Collections

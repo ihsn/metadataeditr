@@ -358,7 +358,7 @@ me_patch_project <- function(
   
   httpResponse <- POST(url,
                        add_headers("X-API-KEY" = api_key),
-                       body=patches,
+                       body=list(patches=patches),
                        content_type_json(),
                        encode="json",
                        accept_json(),
