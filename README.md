@@ -46,6 +46,9 @@ For usage examples by area, see [`examples.md`](examples.md).
 
 For the full **global DSD → indicator project → bind → validate → upload** workflow, see
 [`examples/indicator_dsd_full_workflow.R`](examples/indicator_dsd_full_workflow.R).
+For a complete workflow that creates a codelist and DSD, creates and binds an indicator project,
+imports observations, and reads/exports the resulting data, see
+[`examples/indicator_end_to_end.R`](examples/indicator_end_to_end.R).
 
 
 # Exported functions
@@ -98,6 +101,24 @@ Short reference for package exports. Paths and payloads match the Editor OpenAPI
 | `me_data_structure_list` | `GET /data_structures` |
 | `me_data_structure_get` | `GET /data_structures/single/{id}` |
 | `me_data_structure_export` | `GET /data_structures/export/{segment}` |
+| `me_data_structure_by_identity` | Resolve a DSD by agency, name, and version |
+| `me_data_structure_lookup` | Resolve a DSD by numeric ID or idno |
+| `me_data_structure_create` / `me_data_structure_update` / `me_data_structure_delete` | Create, update, and delete a registry DSD |
+| `me_data_structure_components` | Search registry components |
+| `me_data_structure_component_add` / `me_data_structure_component_update` / `me_data_structure_component_delete` | Manage DSD components |
+| `me_data_structure_duplicate` / `me_data_structure_versions` / `me_data_structure_projects` | Duplicate a DSD, list versions, and list linked projects |
+
+### Codelists
+
+| Function | Description |
+|----------|-------------|
+| `me_codelist_list` / `me_codelist_versions` | List codelists and versions |
+| `me_codelist_get` / `me_codelist_by_identity` | Get a codelist by ID or SDMX identity |
+| `me_codelist_create` / `me_codelist_update` / `me_codelist_delete` | Manage codelist metadata |
+| `me_codelist_codes` / `me_codelist_code_add` / `me_codelist_code_update` / `me_codelist_code_delete` | List and manage codes |
+| `me_codelist_code_label_set` / `me_codelist_code_label_delete` | Manage code labels/translations |
+| `me_codelist_translations` / `me_codelist_translation_set` | List and set codelist language labels |
+| `me_codelist_import_json` / `me_codelist_export_json` | Import and export a codelist as JSON |
 
 ### Indicator DSD (project binding, validation, data)
 
@@ -110,6 +131,10 @@ Short reference for package exports. Paths and payloads match the Editor OpenAPI
 | `me_indicator_dsd_upload_prepare` | Multipart CSV stage + header validation |
 | `me_indicator_dsd_upload_import` | Import staged CSV into DuckDB timeseries |
 | `me_indicator_publish_data` | Prepare + import in one call |
+| `me_indicator_dsd_list` / `me_indicator_dsd_column_get` | Read project DSD columns |
+| `me_indicator_dsd_unbind` | Remove the DSD binding and published data |
+| `me_indicator_data_values` / `me_indicator_data_rows` | Read distinct values or filtered, paginated observations |
+| `me_indicator_data_export` / `me_indicator_data_delete` | Export observations to CSV or delete published observations |
 
 ### Indicator data & background jobs
 

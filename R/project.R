@@ -15,11 +15,10 @@
 #' @examples
 #'
 #'
-#' me_list_projects (
+#' me_list_projects(
 #'   keywords="some keywords or project IDNO",
 #'   filter_type = c("survey","timeseries"),
 #'   filter_collection = c(1,2)
-#'   metadata = list()
 #' )
 #'
 #'
@@ -74,17 +73,8 @@ me_list_projects <- function(
     search_params=paste0(search_params,"&offset=",offset,"&limit=",limit)
   }
   
-  print (search_params)
-  
   endpoint <- paste0('editor/?',search_params)
-  
-  print(endpoint)
-  
-  if(is.null(api_base_url)){
-    url=me_get_api_url(endpoint=endpoint)
-  } else {
-    url = paste0(api_base_url,"/",endpoint)
-  }
+  url <- me_api_url_for(endpoint, api_base_url)
   
   httpResponse <- GET(url,
                       add_headers("X-API-KEY" = api_key),
@@ -114,8 +104,7 @@ me_list_projects <- function(
 #'
 #' Create a new project
 #'
-#' @return NULL
-#' @param type (required) Type of project - survey, geospatial, table, document, timeseries
+#' @return List with status_code and response.
 #' @param idno \strong{(required)} Project unique IDNO
 #' @param metadata \strong{(required)} Metadata list depending on the type of study
 #' @param thumbnail Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG
@@ -171,11 +160,7 @@ me_create_project <- function(
 
   # Create url
   endpoint <- paste0('editor/create/',type)
-  if(is.null(api_base_url)){
-    url=me_get_api_url(endpoint=endpoint)
-  } else {
-    url = paste0(api_base_url,"/",endpoint)
-  }
+  url <- me_api_url_for(endpoint, api_base_url)
   
   print(url)
   
@@ -190,55 +175,37 @@ me_create_project <- function(
   if(httpResponse$status_code!=200){
     warning(content(httpResponse, "text"))
   }
-  
+
   thumbnail_result=NULL
-  
-  #upload thumbnail
   if(!is.null(thumbnail) && file.exists(thumbnail)) {
     thumbnail_result=me_thumbnail_upload(idno=idno,thumbnail = thumbnail)
   }
-  
-  #set default thumbnail
   if(!is.null(thumbnail) && thumbnail == 'default'){
     thumbnail_result= me_thumbnail_delete(idno=idno)
   }
-  
+
   output=list(
     "status_code"=httpResponse$status_code,
     "response"= me_metadataedit_http_response_json(httpResponse),
     "thumbnail"=thumbnail_result
   )
-  
   return (output)
 }
 
 
 #' Update project
 #'
-#' Update project
+#' Update project metadata.
 #'
-#' @return NULL
-#' @param type (required) Type of project - survey, geospatial, table, document, timeseries
-#' @param idno \strong{(required)} Project unique IDNO
-#' @param metadata \strong{(required)} Metadata list depending on the type of study
-#' @param partial_update Update only partial metadata (TRUE/FALSE)
-#' @param thumbnail Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG
-#' @param collection_ids List of collection IDs to assign to project
-#' @param api_key API key (optional if API key is set using me_set_api_key)
-#' @param api_base_url API base endpoint (optional if API base endpoint is set using me_set_api_url)
-#'
-#' @examples
-#'
-#'
-#' me_update_project (
-#'   type="survey",
-#'   idno = "unique-idno-for-project",
-#'   metadata = list()
-#' )
-#'
-#'
-#'
-#'
+#' @return List with status_code, response, and optional thumbnail result.
+#' @param type Project type.
+#' @param idno Project unique IDNO.
+#' @param metadata Metadata list for the project type.
+#' @param partial_update Update only supplied metadata fields.
+#' @param thumbnail Optional thumbnail path or "default" to remove a custom thumbnail.
+#' @param collection_ids Collection IDs to assign to the project.
+#' @param api_key API key (optional if configured with me_set_api_key).
+#' @param api_base_url API base URL (optional if configured with me_set_api_url).
 #' @export
 me_update_project <- function(
     type,
@@ -249,26 +216,17 @@ me_update_project <- function(
     collection_ids=list(),
     api_key=NULL,
     api_base_url=NULL){
-  
+
   if(is.null(api_key)){
     api_key=me_get_api_key();
   }
-  
   if (partial_update==TRUE){
     metadata$partial_update=TRUE
   }
-
   metadata$collection_ids=collection_ids
-  
-  # Create url
+
   endpoint <- paste0('editor/update/',type,"/",idno)
-  
-  if(is.null(api_base_url)){
-    url=me_get_api_url(endpoint=endpoint)
-  } else {
-    url = paste0(api_base_url,"/",endpoint)
-  }
-  
+  url <- me_api_url_for(endpoint, api_base_url)
   httpResponse <- POST(url,
                        add_headers("X-API-KEY" = api_key),
                        body=metadata,
@@ -276,32 +234,23 @@ me_update_project <- function(
                        encode="json",
                        accept_json(),
                        verbose(me_get_verbose()))
-  
-  output=NULL
-  
+
   if(httpResponse$status_code!=200){
     warning(content(httpResponse, "text"))
   }
-  
   thumbnail_result=NULL
-  
-  #upload thumbnail
   if(!is.null(thumbnail) && file.exists(thumbnail)) {
     thumbnail_result=me_thumbnail_upload(idno=idno,thumbnail = thumbnail)
   }
-  
-  #set default thumbnail
   if(!is.null(thumbnail) && thumbnail == 'default'){
     thumbnail_result= me_thumbnail_delete(idno=idno)
   }
-  
-  output=list(
+
+  list(
     "status_code"=httpResponse$status_code,
     "response"= me_metadataedit_http_response_json(httpResponse),
     "thumbnail"=thumbnail_result
   )
-  
-  return (output)
 }
 
 
@@ -350,11 +299,7 @@ me_patch_project <- function(
   
   endpoint <- paste0('editor/patch/',type,'/',idno)
   
-  if(is.null(api_base_url)){
-    url=me_get_api_url(endpoint=endpoint)
-  } else {
-    url = paste0(api_base_url,"/",endpoint)
-  }
+  url <- me_api_url_for(endpoint, api_base_url)
   
   httpResponse <- POST(url,
                        add_headers("X-API-KEY" = api_key),
@@ -408,11 +353,7 @@ me_project_by_idno <- function(
   
   endpoint <- paste0('editor/',idno)
   
-  if(is.null(api_base_url)){
-    url=me_get_api_url(endpoint=endpoint)
-  } else {
-    url = paste0(api_base_url,"/",endpoint)
-  }
+  url <- me_api_url_for(endpoint, api_base_url)
   
   print(url)
   
@@ -464,11 +405,7 @@ me_project_by_id <- function(
   
   endpoint <- paste0('editor/',id)
   
-  if(is.null(api_base_url)){
-    url=me_get_api_url(endpoint=endpoint)
-  } else {
-    url = paste0(api_base_url,"/",endpoint)
-  }
+  url <- me_api_url_for(endpoint, api_base_url)
   
   print(url)
   
@@ -534,11 +471,7 @@ me_import_project <- function(
   
   # Create url
   endpoint <- paste0('importproject')
-  if(is.null(api_base_url)){
-    url=me_get_api_url(endpoint=endpoint)
-  } else {
-    url = paste0(api_base_url,"/",endpoint)
-  }
+  url <- me_api_url_for(endpoint, api_base_url)
   
   if (!file.exists(file_path)){
     stop(paste("File not found: ", file_path))

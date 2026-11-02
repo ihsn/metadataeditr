@@ -46,10 +46,10 @@ before upload and stop when \code{import_ready} is false. Default \code{TRUE}.}
 \value{
 List with:
   \itemize{
-    \item \code{upload_id}   — The upload session ID used
-    \item \code{job_uuid}    — The background job UUID
-    \item \code{status_code} — Final HTTP status from the job poll
-    \item \code{response}    — Final job object (includes \code{indicators_imported},
+    \item \code{upload_id}   - The upload session ID used
+    \item \code{job_uuid}    - The background job UUID
+    \item \code{status_code} - Final HTTP status from the job poll
+    \item \code{response}    - Final job object (includes \code{indicators_imported},
       \code{indicators_failed}, \code{message})
   }
 }

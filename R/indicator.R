@@ -22,11 +22,7 @@ me_job_wait <- function(job_uuid,
                      api_base_url     = NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  if (is.null(api_base_url)) {
-    url <- me_get_api_url(paste0("jobs/", job_uuid))
-  } else {
-    url <- paste0(api_base_url, "/jobs/", job_uuid)
-  }
+  url <- me_api_url_for(paste0("jobs/", me_api_path_segment(job_uuid, "job_uuid")), api_base_url)
 
   deadline <- Sys.time() + timeout_seconds
 
@@ -44,7 +40,7 @@ me_job_wait <- function(job_uuid,
     job_status <- if (is.list(job_obj) && !is.null(job_obj$status)) job_obj$status else NA_character_
 
     if (show_progress) {
-      message(sprintf("  Job %s — status: %s", job_uuid, job_status))
+      message(sprintf("  Job %s - status: %s", job_uuid, job_status))
     }
 
     if (identical(job_status, "completed")) {
@@ -144,11 +140,7 @@ me_indicator_import_job_submit <- function(project_id,
                                         api_base_url    = NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  if (is.null(api_base_url)) {
-    url <- me_get_api_url("jobs/import_indicator_data")
-  } else {
-    url <- paste0(api_base_url, "/jobs/import_indicator_data")
-  }
+  url <- me_api_url_for("jobs/import_indicator_data", api_base_url)
 
   pid_json <- me_normalize_project_id_for_import_job(project_id)
 
@@ -219,10 +211,10 @@ me_indicator_import_job_submit <- function(project_id,
 #'
 #' @return List with:
 #'   \itemize{
-#'     \item \code{upload_id}   — The upload session ID used
-#'     \item \code{job_uuid}    — The background job UUID
-#'     \item \code{status_code} — Final HTTP status from the job poll
-#'     \item \code{response}    — Final job object (includes \code{indicators_imported},
+#'     \item \code{upload_id}   - The upload session ID used
+#'     \item \code{job_uuid}    - The background job UUID
+#'     \item \code{status_code} - Final HTTP status from the job poll
+#'     \item \code{response}    - Final job object (includes \code{indicators_imported},
 #'       \code{indicators_failed}, \code{message})
 #'   }
 #'
@@ -275,7 +267,7 @@ me_import_indicator_data <- function(project_id,
     }
   }
 
-  # ── Step 1: Upload the CSV ─────────────────────────────────────────────────
+  # -- Step 1: Upload the CSV -------------------------------------------------
 
   if (show_progress) {
     message(sprintf("Uploading %s ...", basename(csv_file)))
@@ -297,10 +289,10 @@ me_import_indicator_data <- function(project_id,
   upload_id <- upload_result$upload_id
 
   if (show_progress) {
-    message(sprintf("Upload complete — upload_id: %s", upload_id))
+    message(sprintf("Upload complete - upload_id: %s", upload_id))
   }
 
-  # ── Step 2: Submit the import job ──────────────────────────────────────────
+  # -- Step 2: Submit the import job ------------------------------------------
 
   if (show_progress) {
     message("Submitting import job ...")
@@ -324,12 +316,12 @@ me_import_indicator_data <- function(project_id,
   job_uuid <- job_result$uuid
 
   if (show_progress) {
-    message(sprintf("Import job queued — uuid: %s", job_uuid))
+    message(sprintf("Import job queued - uuid: %s", job_uuid))
     message(sprintf("Waiting for completion (timeout: %d s, polling every %d s) ...",
                     timeout_seconds, interval_seconds))
   }
 
-  # ── Step 3: Poll until done ────────────────────────────────────────────────
+  # -- Step 3: Poll until done ------------------------------------------------
 
   poll_result <- me_job_wait(
     job_uuid         = job_uuid,
@@ -344,7 +336,7 @@ me_import_indicator_data <- function(project_id,
     # poll_result$response is the job object (body$job from the API)
     job_obj    <- poll_result$response
     job_status <- if (is.list(job_obj) && !is.null(job_obj$status)) job_obj$status else "unknown"
-    message(sprintf("Job %s — final status: %s", job_uuid, job_status))
+    message(sprintf("Job %s - final status: %s", job_uuid, job_status))
 
     result_data <- if (is.list(job_obj) && !is.null(job_obj$result)) job_obj$result else NULL
     if (!is.null(result_data) && !is.null(result_data$message)) {

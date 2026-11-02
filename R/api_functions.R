@@ -3,7 +3,7 @@
 #' Convenience wrapper that calls \code{\link{me_set_api_url}}, \code{\link{me_set_api_key}},
 #' and \code{\link{me_set_api_verbose}}.
 #'
-#' @param api_url API base endpoint URL (include trailing slash if your paths expect it).
+#' @param api_url API base endpoint URL (a trailing slash is optional).
 #' @param api_key API key for \code{X-API-KEY}.
 #' @param verbose Logical; passed to \code{\link{me_set_api_verbose}} (default \code{FALSE}).
 #'
@@ -65,13 +65,11 @@ me_set_api_url <- function(api_url) {
 #' @export
 me_get_api_url <- function(endpoint = NULL)
 {
-  url = pkg.globals$api_base_url
-  
-  if(!is.null(endpoint)){
-    url = paste0(url,"/",endpoint)
+  url <- sub("/+$", "", pkg.globals$api_base_url)
+  if (!is.null(endpoint)) {
+    url <- paste0(url, "/", sub("^/+", "", endpoint))
   }
-  
-  return(url)
+  url
 }
 
 #' set_verbose

@@ -16,35 +16,25 @@ me_update_project(
 )
 }
 \arguments{
-\item{type}{(required) Type of project - survey, geospatial, table, document, timeseries}
+\item{type}{Project type.}
 
-\item{idno}{\strong{(required)} Project unique IDNO}
+\item{idno}{Project unique IDNO.}
 
-\item{metadata}{\strong{(required)} Metadata list depending on the type of study}
+\item{metadata}{Metadata list for the project type.}
 
-\item{partial_update}{Update only partial metadata (TRUE/FALSE)}
+\item{partial_update}{Update only supplied metadata fields.}
 
-\item{thumbnail}{Path to thumbnail image file. Supported types are JPG, JPEG, GIF, PNG}
+\item{thumbnail}{Optional thumbnail path or "default" to remove a custom thumbnail.}
 
-\item{collection_ids}{List of collection IDs to assign to project}
+\item{collection_ids}{Collection IDs to assign to the project.}
 
-\item{api_key}{API key (optional if API key is set using me_set_api_key)}
+\item{api_key}{API key (optional if configured with me_set_api_key).}
 
-\item{api_base_url}{API base endpoint (optional if API base endpoint is set using me_set_api_url)}
+\item{api_base_url}{API base URL (optional if configured with me_set_api_url).}
+}
+\value{
+List with status_code, response, and optional thumbnail result.
 }
 \description{
-Update project
-}
-\examples{
-
-
-me_update_project (
-  type="survey",
-  idno = "unique-idno-for-project",
-  metadata = list()
-)
-
-
-
-
+Update project metadata.
 }

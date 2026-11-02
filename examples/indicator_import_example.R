@@ -1,8 +1,8 @@
 # Examples: importing timeseries data into an indicator project
 #
 # Covers three levels of control:
-#   1. import_indicator_data()       (upload + submit + poll in one call)
-#   2. upload then indicator_import_job_submit() + job_wait()
+#   1. me_import_indicator_data()       (upload + submit + poll in one call)
+#   2. upload then me_indicator_import_job_submit() + me_job_wait()
 #   3. upload then submit without waiting (fire-and-forget / manual poll)
 
 library(metadataeditr)
@@ -16,8 +16,8 @@ if (requireNamespace("rstudioapi", quietly = TRUE) && rstudioapi::isAvailable())
 readRenviron(".Renviron")
 
 # Configure from environment
-set_api_key(Sys.getenv("METADATAEDITR_API_KEY"))
-set_api_url(Sys.getenv("METADATAEDITR_API_BASE_URL"))
+me_set_api_key(Sys.getenv("METADATAEDITR_API_KEY"))
+me_set_api_url(Sys.getenv("METADATAEDITR_API_BASE_URL"))
 
 # Project ID of the indicator/timeseries project to import data into.
 # The DSD (data structure definition) must already be set up on the project.
@@ -35,7 +35,7 @@ CSV_FILE <- "example-indicators.csv"
 # This is the recommended approach for most use cases.
 # The function prints progress messages as it goes.
 
-result <- import_indicator_data(
+result <- me_import_indicator_data(
   project_id       = PROJECT_ID,
   csv_file         = CSV_FILE,
   indicator_value  = "21139",  # only import rows for this indicator code
@@ -66,7 +66,8 @@ if (!is.null(result$response$status) && result$response$status == "completed") {
 # 
 
 # Step 1 — upload the file
-upload_result <- upload_file_chunked(
+upload_result <- me_upload_file_chunked(
+  sid        = PROJECT_ID,
   file_path  = CSV_FILE,
   chunk_size = 10485760   # 10 MB chunks
 )
@@ -75,17 +76,18 @@ upload_id <- upload_result$upload_id
 message("Uploaded — upload_id: ", upload_id)
 
 # Step 2 — submit the import job
-job_result <- indicator_import_job_submit(
-  project_id = PROJECT_ID,
-  upload_id  = upload_id,
-  delimiter  = ","
+job_result <- me_indicator_import_job_submit(
+  project_id      = PROJECT_ID,
+  upload_id       = upload_id,
+  indicator_value = "21139",
+  delimiter       = ","
 )
 print(job_result$status_code)   # expect 201
 job_uuid <- job_result$uuid
 message("Job queued — uuid: ", job_uuid)
 
 # Step 3 — poll until done
-poll_result <- job_wait(
+poll_result <- me_job_wait(
   job_uuid         = job_uuid,
   timeout_seconds  = 1800,
   interval_seconds = 10
@@ -99,12 +101,13 @@ print(poll_result$response)
 # Useful for long-running imports or when you want to run multiple imports in
 # parallel and check all of them afterwards.
 
-upload_result2 <- upload_file_chunked(file_path = CSV_FILE)
+upload_result2 <- me_upload_file_chunked(sid = PROJECT_ID, file_path = CSV_FILE)
 upload_id2     <- upload_result2$upload_id
 
-job_result2 <- indicator_import_job_submit(
-  project_id = PROJECT_ID,
-  upload_id  = upload_id2
+job_result2 <- me_indicator_import_job_submit(
+  project_id      = PROJECT_ID,
+  upload_id       = upload_id2,
+  indicator_value = "21139"
 )
 job_uuid2 <- job_result2$uuid
 message("Job submitted — uuid: ", job_uuid2)
@@ -113,7 +116,7 @@ message("Check status later via GET /api/jobs/", job_uuid2)
 # ... do other work ...
 
 # Poll manually when ready
-poll_later <- job_wait(job_uuid = job_uuid2, interval_seconds = 30)
+poll_later <- me_job_wait(job_uuid = job_uuid2, interval_seconds = 30)
 print(poll_later$response$status)
 print(poll_later$response$result)
 
@@ -182,7 +185,7 @@ indicator_metadata <- list(
 )
 
 # Step A: create the project + DSD
-create_resp <- create_project(
+create_resp <- me_create_project(
   type      = "timeseries",
   idno      = indicator_metadata$idno,
   metadata  = indicator_metadata,
@@ -193,7 +196,7 @@ new_project_id <- create_resp$response$project$id
 message("Project created — id: ", new_project_id)
 
 # Step B: import data for one indicator from the CSV
-import_result <- import_indicator_data(
+import_result <- me_import_indicator_data(
   project_id      = new_project_id,
   csv_file        = CSV_FILE,
   indicator_value = "21139"             # must exist in the Indicator.Code column

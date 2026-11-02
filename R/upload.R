@@ -14,11 +14,7 @@
 me_upload_limits <- function(api_key=NULL, api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  if (is.null(api_base_url)) {
-    url <- me_get_api_url("upload/limits")
-  } else {
-    url <- paste0(api_base_url, "/upload/limits")
-  }
+  url <- me_api_url_for("upload/limits", api_base_url)
 
   httpResponse <- GET(url,
                       add_headers("X-API-KEY" = api_key),
@@ -61,11 +57,7 @@ me_upload_init <- function(sid,
                         api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  if (is.null(api_base_url)) {
-    url <- me_get_api_url(paste0("upload/", sid))
-  } else {
-    url <- paste0(api_base_url, "/upload/", sid)
-  }
+  url <- me_api_url_for(paste0("upload/", me_api_path_segment(sid, "sid")), api_base_url)
 
   total_chunks <- ceiling(total_size / chunk_size)
 
@@ -120,11 +112,7 @@ me_upload_chunk <- function(sid,
                          api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  if (is.null(api_base_url)) {
-    url <- me_get_api_url(paste0("upload/", sid))
-  } else {
-    url <- paste0(api_base_url, "/upload/", sid)
-  }
+  url <- me_api_url_for(paste0("upload/", me_api_path_segment(sid, "sid")), api_base_url)
 
   httpResponse <- POST(url,
                        add_headers(
@@ -167,11 +155,10 @@ me_upload_chunk <- function(sid,
 me_upload_status <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  if (is.null(api_base_url)) {
-    url <- me_get_api_url(paste0("upload/status/", sid, "/", upload_id))
-  } else {
-    url <- paste0(api_base_url, "/upload/status/", sid, "/", upload_id)
-  }
+  url <- me_api_url_for(
+    paste0("upload/status/", me_api_path_segment(sid, "sid"), "/", me_api_path_segment(upload_id, "upload_id")),
+    api_base_url
+  )
 
   httpResponse <- GET(url,
                       add_headers("X-API-KEY" = api_key),
@@ -206,11 +193,10 @@ me_upload_status <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
 me_upload_delete <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  if (is.null(api_base_url)) {
-    url <- me_get_api_url(paste0("upload/", sid, "/", upload_id))
-  } else {
-    url <- paste0(api_base_url, "/upload/", sid, "/", upload_id)
-  }
+  url <- me_api_url_for(
+    paste0("upload/", me_api_path_segment(sid, "sid"), "/", me_api_path_segment(upload_id, "upload_id")),
+    api_base_url
+  )
 
   httpResponse <- DELETE(url,
                          add_headers("X-API-KEY" = api_key),
@@ -295,7 +281,7 @@ me_upload_file_chunked <- function(sid,
   total_size <- file.info(file_path)$size
   total_chunks <- ceiling(total_size / chunk_size)
 
-  # ── Initialize or resume session ─────────────────────────────────────────
+  # -- Initialize or resume session -----------------------------------------
   upload_id      <- resume_upload_id
   chunks_done    <- c()
 
@@ -304,7 +290,7 @@ me_upload_file_chunked <- function(sid,
     if (status_result$status_code == 200) {
       chunks_done <- as.integer(status_result$response$uploaded_chunks)
       if (show_progress) {
-        message(sprintf("Resuming upload %s — %d/%d chunks already uploaded",
+        message(sprintf("Resuming upload %s - %d/%d chunks already uploaded",
                         upload_id, length(chunks_done), total_chunks))
       }
     } else {
@@ -331,12 +317,12 @@ me_upload_file_chunked <- function(sid,
     upload_id <- init_result$response$upload_id
 
     if (show_progress) {
-      message(sprintf("Initialized upload session %s — %d chunks of %s bytes each",
+      message(sprintf("Initialized upload session %s - %d chunks of %s bytes each",
                       upload_id, total_chunks, format(chunk_size, big.mark=",")))
     }
   }
 
-  # ── Upload chunks ─────────────────────────────────────────────────────────
+  # -- Upload chunks ---------------------------------------------------------
   con <- file(file_path, "rb")
   on.exit(close(con), add=TRUE)
 
@@ -348,7 +334,7 @@ me_upload_file_chunked <- function(sid,
     # Skip chunks the server already has
     if (chunk_number %in% chunks_done) {
       if (show_progress) {
-        message(sprintf("  Chunk %d/%d — skipped (already uploaded)", i, total_chunks))
+        message(sprintf("  Chunk %d/%d - skipped (already uploaded)", i, total_chunks))
       }
       next
     }
@@ -379,7 +365,7 @@ me_upload_file_chunked <- function(sid,
 
     if (show_progress) {
       progress <- result$response$progress
-      message(sprintf("  Chunk %d/%d — %.1f%% complete", i, total_chunks, progress))
+      message(sprintf("  Chunk %d/%d - %.1f%% complete", i, total_chunks, progress))
     }
   }
 

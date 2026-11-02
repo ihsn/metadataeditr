@@ -17,8 +17,6 @@ me_create_project(
 )
 }
 \arguments{
-\item{type}{(required) Type of project - survey, geospatial, table, document, timeseries}
-
 \item{idno}{\strong{(required)} Project unique IDNO}
 
 \item{metadata}{\strong{(required)} Metadata list depending on the type of study}
@@ -34,6 +32,9 @@ me_create_project(
 \item{api_key}{API key (optional if API key is set using me_set_api_key)}
 
 \item{api_base_url}{API base endpoint (optional if API base endpoint is set using me_set_api_url)}
+}
+\value{
+List with status_code and response.
 }
 \description{
 Create a new project

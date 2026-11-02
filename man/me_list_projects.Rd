@@ -37,11 +37,10 @@ Get paginated projects list
 \examples{
 
 
-me_list_projects (
+me_list_projects(
   keywords="some keywords or project IDNO",
   filter_type = c("survey","timeseries"),
   filter_collection = c(1,2)
-  metadata = list()
 )
 
 

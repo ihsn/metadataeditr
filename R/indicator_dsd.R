@@ -1,3 +1,187 @@
+#' List project indicator DSD columns
+#'
+#' @param project_id Project numeric ID or idno.
+#' @param detailed Return detailed column rows.
+#' @param offset Pagination offset.
+#' @param limit Optional page size.
+#' @param resolve_codelists Expand linked global codelists in the returned columns.
+#' @param api_key API key (optional).
+#' @param api_base_url API base URL (optional).
+#' @return List with status_code and response.
+#' @export
+me_indicator_dsd_list <- function(project_id,
+                                  detailed = FALSE,
+                                  offset = NULL,
+                                  limit = NULL,
+                                  resolve_codelists = FALSE,
+                                  api_key = NULL,
+                                  api_base_url = NULL) {
+  sid <- me_api_path_segment(project_id, "project_id")
+  me_api_get(
+    paste0("indicator_dsd/", sid),
+    query = list(
+      detailed = detailed,
+      offset = offset,
+      limit = limit,
+      resolve_codelists = resolve_codelists
+    ),
+    api_key = api_key,
+    api_base_url = api_base_url
+  )
+}
+
+#' Get one project indicator DSD column
+#'
+#' @param project_id Project numeric ID or idno.
+#' @param column_id Numeric column ID.
+#' @param api_key API key (optional).
+#' @param api_base_url API base URL (optional).
+#' @return List with status_code and response.
+#' @export
+me_indicator_dsd_column_get <- function(project_id,
+                                        column_id,
+                                        api_key = NULL,
+                                        api_base_url = NULL) {
+  sid <- me_api_path_segment(project_id, "project_id")
+  column <- me_api_path_segment(column_id, "column_id")
+  me_api_get(
+    paste0("indicator_dsd/", sid, "/", column),
+    api_key = api_key,
+    api_base_url = api_base_url
+  )
+}
+
+#' Unbind a global DSD and clear project timeseries data
+#'
+#' This is destructive: the API removes the project binding and published data.
+#'
+#' @param project_id Project numeric ID or idno.
+#' @param api_key API key (optional).
+#' @param api_base_url API base URL (optional).
+#' @return List with status_code and response.
+#' @export
+me_indicator_dsd_unbind <- function(project_id, api_key = NULL, api_base_url = NULL) {
+  sid <- me_api_path_segment(project_id, "project_id")
+  me_api_post_json(
+    paste0("indicator_dsd/unbind/", sid),
+    api_key = api_key,
+    api_base_url = api_base_url
+  )
+}
+
+#' Get distinct values for an indicator data column
+#'
+#' @param project_id Project numeric ID or idno.
+#' @param code_column DSD column whose distinct codes are returned.
+#' @param label_column Optional column containing display labels.
+#' @param limit Maximum number of distinct pairs (API maximum 20000).
+#' @param api_key API key (optional).
+#' @param api_base_url API base URL (optional).
+#' @return List with status_code and response.
+#' @export
+me_indicator_data_values <- function(project_id,
+                                     code_column,
+                                     label_column = NULL,
+                                     limit = NULL,
+                                     api_key = NULL,
+                                     api_base_url = NULL) {
+  sid <- me_api_path_segment(project_id, "project_id")
+  me_api_get(
+    paste0("indicator_dsd/data_values/", sid),
+    query = list(code_column = code_column, label_column = label_column, limit = limit),
+    api_key = api_key,
+    api_base_url = api_base_url
+  )
+}
+
+#' Get a page of published indicator observations
+#'
+#' @param project_id Project numeric ID or idno.
+#' @param offset Zero-based row offset.
+#' @param limit Page size (API maximum 200).
+#' @param filters Optional named list mapping DSD column names to allowed values.
+#' @param api_key API key (optional).
+#' @param api_base_url API base URL (optional).
+#' @return List with status_code and response.
+#' @export
+me_indicator_data_rows <- function(project_id,
+                                   offset = 0,
+                                   limit = 50,
+                                   filters = NULL,
+                                   api_key = NULL,
+                                   api_base_url = NULL) {
+  sid <- me_api_path_segment(project_id, "project_id")
+  if (!is.null(filters)) {
+    if (!is.list(filters) || is.null(names(filters)) || any(names(filters) == "")) {
+      stop("filters must be a named list of column names and value vectors", call. = FALSE)
+    }
+    filters <- as.character(jsonlite::toJSON(filters, auto_unbox = FALSE, null = "null"))
+  }
+  me_api_get(
+    paste0("indicator_dsd/data_rows/", sid),
+    query = list(offset = offset, limit = limit, filters = filters),
+    api_key = api_key,
+    api_base_url = api_base_url
+  )
+}
+
+#' Download published indicator observations as CSV
+#'
+#' @param project_id Project numeric ID or idno.
+#' @param file_path Optional destination path. When NULL, return CSV bytes in the result.
+#' @param api_key API key (optional).
+#' @param api_base_url API base URL (optional).
+#' @return List with status_code, content_type, and either raw content or file_path.
+#' @export
+me_indicator_data_export <- function(project_id,
+                                     file_path = NULL,
+                                     api_key = NULL,
+                                     api_base_url = NULL) {
+  sid <- me_api_path_segment(project_id, "project_id")
+  api_key <- me_api_key(api_key)
+  url <- me_api_url_for(paste0("indicator_dsd/data_export/", sid), api_base_url)
+  httpResponse <- httr::GET(
+    url,
+    httr::add_headers("X-API-KEY" = api_key),
+    httr::verbose(me_get_verbose())
+  )
+  if (httpResponse$status_code < 200L || httpResponse$status_code >= 300L) {
+    warning(httr::content(httpResponse, "text", encoding = "UTF-8"))
+    return(me_api_response_list(httpResponse))
+  }
+  bytes <- httr::content(httpResponse, "raw")
+  if (!is.null(file_path)) {
+    if (length(file_path) != 1L || is.na(file_path) || !nzchar(trimws(file_path))) {
+      stop("file_path must be a single non-empty path", call. = FALSE)
+    }
+    writeBin(bytes, file_path)
+  }
+  list(
+    status_code = httpResponse$status_code,
+    content_type = httr::headers(httpResponse)[["content-type"]],
+    content = if (is.null(file_path)) bytes else NULL,
+    file_path = file_path
+  )
+}
+
+#' Delete all published indicator observations
+#'
+#' This is destructive and requires project edit permission.
+#'
+#' @param project_id Project numeric ID or idno.
+#' @param api_key API key (optional).
+#' @param api_base_url API base URL (optional).
+#' @return List with status_code and response.
+#' @export
+me_indicator_data_delete <- function(project_id, api_key = NULL, api_base_url = NULL) {
+  sid <- me_api_path_segment(project_id, "project_id")
+  me_api_post_json(
+    paste0("indicator_dsd/data_delete/", sid),
+    api_key = api_key,
+    api_base_url = api_base_url
+  )
+}
+
 #' Bind a global catalogue DSD to an indicator project
 #'
 #' \code{POST /api/indicator_dsd/bind_global/{sid}}

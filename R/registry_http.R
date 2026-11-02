@@ -8,11 +8,9 @@ me_api_key <- function(api_key) {
 }
 
 me_api_url_for <- function(endpoint, api_base_url = NULL) {
-  if (is.null(api_base_url)) {
-    return(me_get_api_url(endpoint))
-  }
-  base <- sub("/$", "", api_base_url)
-  ep <- sub("^/", "", endpoint)
+  base <- if (is.null(api_base_url)) me_get_api_url() else api_base_url
+  base <- sub("/+$", "", base)
+  ep <- sub("^/+", "", endpoint)
   paste0(base, "/", ep)
 }
 
@@ -20,11 +18,23 @@ me_project_path_id <- function(project_id) {
   utils::URLencode(as.character(project_id), reserved = TRUE)
 }
 
+me_api_path_segment <- function(value, arg_name) {
+  if (is.null(value) || length(value) != 1L || anyNA(value)) {
+    stop(arg_name, " must be a single non-empty value", call. = FALSE)
+  }
+  value <- trimws(as.character(value))
+  if (!nzchar(value)) {
+    stop(arg_name, " must be a single non-empty value", call. = FALSE)
+  }
+  me_project_path_id(value)
+}
+
 me_api_query_string <- function(params) {
   keep <- vapply(
     params,
     function(x) {
       if (is.null(x)) return(FALSE)
+      if (length(x) == 0L) return(FALSE)
       if (length(x) == 1L && (is.na(x) || identical(x, ""))) return(FALSE)
       TRUE
     },

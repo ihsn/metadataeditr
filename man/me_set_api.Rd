@@ -7,7 +7,7 @@
 me_set_api(api_url, api_key, verbose = FALSE)
 }
 \arguments{
-\item{api_url}{API base endpoint URL (include trailing slash if your paths expect it).}
+\item{api_url}{API base endpoint URL (a trailing slash is optional).}
 
 \item{api_key}{API key for \code{X-API-KEY}.}
 

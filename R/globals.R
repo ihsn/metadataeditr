@@ -53,13 +53,11 @@ me_set_api_url <- function(api_url) {
 #' @export
 me_get_api_url <- function(endpoint=NULL)
 {
-  url=pkg.globals$api_base_url
-  
-  if(!is.null(endpoint)){
-    url=paste0(url,"/",endpoint)
+  url <- sub("/+$", "", pkg.globals$api_base_url)
+  if (!is.null(endpoint)) {
+    url <- paste0(url, "/", sub("^/+", "", endpoint))
   }
-  
-  return (url)
+  url
 }
 
 
