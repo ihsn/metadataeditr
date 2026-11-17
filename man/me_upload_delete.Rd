@@ -4,10 +4,10 @@
 \alias{me_upload_delete}
 \title{Delete a resumable upload session}
 \usage{
-me_upload_delete(sid, upload_id, api_key = NULL, api_base_url = NULL)
+me_upload_delete(sid = NULL, upload_id, api_key = NULL, api_base_url = NULL)
 }
 \arguments{
-\item{sid}{(required) Project ID/IDNO used by upload routes}
+\item{sid}{Unused; uploads are not tied to a project. Kept for backward compatibility.}
 
 \item{upload_id}{(required) Upload session ID to delete}
 
@@ -20,6 +20,6 @@ Cancels and removes an upload session and its temporary chunks from the server.
 }
 \examples{
 
-me_upload_delete("PROJECT_IDNO", "abc123-upload-id")
+me_upload_delete(upload_id = "abc123-upload-id")
 
 }

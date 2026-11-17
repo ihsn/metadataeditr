@@ -5,7 +5,7 @@
 \title{Upload a single chunk}
 \usage{
 me_upload_chunk(
-  sid,
+  sid = NULL,
   upload_id,
   chunk_number,
   chunk_data,
@@ -15,7 +15,7 @@ me_upload_chunk(
 )
 }
 \arguments{
-\item{sid}{(required) Project ID/IDNO used by upload routes}
+\item{sid}{Unused; uploads are not tied to a project. Kept for backward compatibility.}
 
 \item{upload_id}{(required) Upload session ID returned by me_upload_init}
 

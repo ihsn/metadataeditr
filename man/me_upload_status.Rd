@@ -4,10 +4,10 @@
 \alias{me_upload_status}
 \title{Get the status of a resumable upload}
 \usage{
-me_upload_status(sid, upload_id, api_key = NULL, api_base_url = NULL)
+me_upload_status(sid = NULL, upload_id, api_key = NULL, api_base_url = NULL)
 }
 \arguments{
-\item{sid}{(required) Project ID/IDNO used by upload routes}
+\item{sid}{Unused; uploads are not tied to a project. Kept for backward compatibility.}
 
 \item{upload_id}{(required) Upload session ID}
 
@@ -21,6 +21,6 @@ an upload session.
 }
 \examples{
 
-me_upload_status("PROJECT_IDNO", "abc123-upload-id")
+me_upload_status(upload_id = "abc123-upload-id")
 
 }

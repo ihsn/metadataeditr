@@ -417,11 +417,16 @@ me_indicator_dsd_upload_import <- function(project_id,
 #' @param implied_freq_code SDMX FREQ when structure has no periodicity column.
 #' @param keep_extra_csv_columns Pass extra CSV columns through to import.
 #' @param delimiter CSV delimiter for prepare. Default \code{","}.
+#' @param resumable Send the CSV in chunks with \code{\link{me_upload_file_chunked}}
+#'   and prepare it by \code{upload_id}. Use for files larger than the web
+#'   server's request body limit. Default \code{FALSE}.
+#' @param chunk_size Chunk size in bytes when \code{resumable = TRUE}. Default 10 MB.
 #' @param api_key API key (optional).
 #' @param api_base_url API base endpoint (optional).
 #'
 #' @return List with \code{prepare} and \code{import} sub-lists (each has
-#'   \code{status_code} and \code{response}).
+#'   \code{status_code} and \code{response}), plus \code{upload_id} when
+#'   \code{resumable = TRUE}.
 #' @export
 me_indicator_publish_data <- function(project_id,
                                         csv_file,
@@ -430,6 +435,8 @@ me_indicator_publish_data <- function(project_id,
                                         implied_freq_code = NULL,
                                         keep_extra_csv_columns = FALSE,
                                         delimiter = ",",
+                                        resumable = FALSE,
+                                        chunk_size = 10485760,
                                         api_key = NULL,
                                         api_base_url = NULL) {
   if (isTRUE(check_import_ready)) {
@@ -448,14 +455,34 @@ me_indicator_publish_data <- function(project_id,
     }
   }
 
-  prep <- me_indicator_dsd_upload_prepare(
-    project_id = project_id,
-    csv_file = csv_file,
-    delimiter = delimiter,
-    keep_extra_csv_columns = keep_extra_csv_columns,
-    api_key = api_key,
-    api_base_url = api_base_url
-  )
+  upload_id <- NULL
+  if (isTRUE(resumable)) {
+    upload <- me_upload_file_chunked(
+      file_path = csv_file,
+      chunk_size = chunk_size,
+      show_progress = FALSE,
+      api_key = api_key,
+      api_base_url = api_base_url
+    )
+    upload_id <- upload$upload_id
+    prep <- me_indicator_dsd_upload_prepare(
+      project_id = project_id,
+      upload_id = upload_id,
+      delimiter = delimiter,
+      keep_extra_csv_columns = keep_extra_csv_columns,
+      api_key = api_key,
+      api_base_url = api_base_url
+    )
+  } else {
+    prep <- me_indicator_dsd_upload_prepare(
+      project_id = project_id,
+      csv_file = csv_file,
+      delimiter = delimiter,
+      keep_extra_csv_columns = keep_extra_csv_columns,
+      api_key = api_key,
+      api_base_url = api_base_url
+    )
+  }
   if (prep$status_code != 200 || !isTRUE(prep$response$headers_valid)) {
     stop(
       "CSV prepare failed (HTTP ",
@@ -475,5 +502,7 @@ me_indicator_publish_data <- function(project_id,
     api_base_url = api_base_url
   )
 
-  list(prepare = prep, import = imp)
+  result <- list(prepare = prep, import = imp)
+  if (!is.null(upload_id)) result$upload_id <- upload_id
+  result
 }

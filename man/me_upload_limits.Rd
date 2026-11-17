@@ -13,7 +13,7 @@ me_upload_limits(api_key = NULL, api_base_url = NULL)
 }
 \description{
 Returns the server's maximum chunk size, recommended chunk size, and maximum
-file size for resumable uploads.
+file size for resumable uploads (\code{GET /api/uploads/limits}).
 }
 \examples{
 

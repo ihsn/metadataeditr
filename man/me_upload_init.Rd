@@ -5,7 +5,7 @@
 \title{Initialize a resumable upload session}
 \usage{
 me_upload_init(
-  sid,
+  sid = NULL,
   filename,
   total_size,
   chunk_size,
@@ -15,7 +15,7 @@ me_upload_init(
 )
 }
 \arguments{
-\item{sid}{(required) Project ID/IDNO used by upload routes}
+\item{sid}{Unused; uploads are not tied to a project. Kept for backward compatibility.}
 
 \item{filename}{(required) Name of the file being uploaded}
 

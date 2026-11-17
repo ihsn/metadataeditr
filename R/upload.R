@@ -1,7 +1,7 @@
 #' Get server upload limits
 #'
 #' Returns the server's maximum chunk size, recommended chunk size, and maximum
-#' file size for resumable uploads.
+#' file size for resumable uploads (\code{GET /api/uploads/limits}).
 #'
 #' @param api_key API key (optional if set via me_set_api_key)
 #' @param api_base_url API base endpoint (optional if set via me_set_api_url)
@@ -14,7 +14,7 @@
 me_upload_limits <- function(api_key=NULL, api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  url <- me_api_url_for("upload/limits", api_base_url)
+  url <- me_api_url_for("uploads/limits", api_base_url)
 
   httpResponse <- GET(url,
                       add_headers("X-API-KEY" = api_key),
@@ -37,7 +37,7 @@ me_upload_limits <- function(api_key=NULL, api_base_url=NULL) {
 #' Creates a new upload session on the server and returns an upload_id to use
 #' for subsequent chunk uploads.
 #'
-#' @param sid (required) Project ID/IDNO used by upload routes
+#' @param sid Unused; uploads are not tied to a project. Kept for backward compatibility.
 #' @param filename (required) Name of the file being uploaded
 #' @param total_size (required) Total file size in bytes
 #' @param chunk_size (required) Size of each chunk in bytes
@@ -48,7 +48,7 @@ me_upload_limits <- function(api_key=NULL, api_base_url=NULL) {
 #' @return List with status_code and response (includes upload_id, upload_url, status_url)
 #'
 #' @export
-me_upload_init <- function(sid,
+me_upload_init <- function(sid = NULL,
                         filename,
                         total_size,
                         chunk_size,
@@ -57,7 +57,7 @@ me_upload_init <- function(sid,
                         api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  url <- me_api_url_for(paste0("upload/", me_api_path_segment(sid, "sid")), api_base_url)
+  url <- me_api_url_for("uploads/init", api_base_url)
 
   total_chunks <- ceiling(total_size / chunk_size)
 
@@ -92,7 +92,7 @@ me_upload_init <- function(sid,
 #'
 #' Sends one binary chunk to the server for an active upload session.
 #'
-#' @param sid (required) Project ID/IDNO used by upload routes
+#' @param sid Unused; uploads are not tied to a project. Kept for backward compatibility.
 #' @param upload_id (required) Upload session ID returned by me_upload_init
 #' @param chunk_number (required) Zero-based chunk index
 #' @param chunk_data (required) Raw bytes for this chunk (use readBin)
@@ -103,7 +103,7 @@ me_upload_init <- function(sid,
 #' @return List with status_code and response (includes me_upload_status and progress)
 #'
 #' @export
-me_upload_chunk <- function(sid,
+me_upload_chunk <- function(sid = NULL,
                          upload_id,
                          chunk_number,
                          chunk_data,
@@ -112,12 +112,11 @@ me_upload_chunk <- function(sid,
                          api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
-  url <- me_api_url_for(paste0("upload/", me_api_path_segment(sid, "sid")), api_base_url)
+  url <- me_api_url_for(paste0("uploads/chunk/", me_api_path_segment(upload_id, "upload_id")), api_base_url)
 
   httpResponse <- POST(url,
                        add_headers(
                          "X-API-KEY"            = api_key,
-                         "X-Upload-ID"           = as.character(upload_id),
                          "X-Upload-Chunk-Number" = as.character(chunk_number),
                          "X-Upload-Chunk-Size"   = as.character(chunk_size),
                          "Content-Type"          = "application/octet-stream"
@@ -142,21 +141,21 @@ me_upload_chunk <- function(sid,
 #' Returns the current progress, list of uploaded chunks, and overall status of
 #' an upload session.
 #'
-#' @param sid (required) Project ID/IDNO used by upload routes
+#' @param sid Unused; uploads are not tied to a project. Kept for backward compatibility.
 #' @param upload_id (required) Upload session ID
 #' @param api_key API key (optional if set via me_set_api_key)
 #' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @examples
 #'
-#' me_upload_status("PROJECT_IDNO", "abc123-upload-id")
+#' me_upload_status(upload_id = "abc123-upload-id")
 #'
 #' @export
-me_upload_status <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
+me_upload_status <- function(sid = NULL, upload_id, api_key=NULL, api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
   url <- me_api_url_for(
-    paste0("upload/status/", me_api_path_segment(sid, "sid"), "/", me_api_path_segment(upload_id, "upload_id")),
+    paste0("uploads/status/", me_api_path_segment(upload_id, "upload_id")),
     api_base_url
   )
 
@@ -180,21 +179,21 @@ me_upload_status <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
 #'
 #' Cancels and removes an upload session and its temporary chunks from the server.
 #'
-#' @param sid (required) Project ID/IDNO used by upload routes
+#' @param sid Unused; uploads are not tied to a project. Kept for backward compatibility.
 #' @param upload_id (required) Upload session ID to delete
 #' @param api_key API key (optional if set via me_set_api_key)
 #' @param api_base_url API base endpoint (optional if set via me_set_api_url)
 #'
 #' @examples
 #'
-#' me_upload_delete("PROJECT_IDNO", "abc123-upload-id")
+#' me_upload_delete(upload_id = "abc123-upload-id")
 #'
 #' @export
-me_upload_delete <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
+me_upload_delete <- function(sid = NULL, upload_id, api_key=NULL, api_base_url=NULL) {
   if (is.null(api_key)) api_key <- me_get_api_key()
 
   url <- me_api_url_for(
-    paste0("upload/", me_api_path_segment(sid, "sid"), "/", me_api_path_segment(upload_id, "upload_id")),
+    paste0("uploads/delete/", me_api_path_segment(upload_id, "upload_id")),
     api_base_url
   )
 
@@ -223,7 +222,7 @@ me_upload_delete <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
 #' The chunk size defaults to 10 MB. You can override it or call \code{me_upload_limits()}
 #' first to fetch the server's recommended chunk size.
 #'
-#' @param sid (required) Project ID/IDNO used by upload routes
+#' @param sid Unused; uploads are not tied to a project. Kept for backward compatibility.
 #' @param file_path (required) Path to the local file to upload
 #' @param chunk_size Chunk size in bytes. Defaults to 10 MB (10485760)
 #' @param metadata Optional named list of metadata to store with the upload session
@@ -244,26 +243,23 @@ me_upload_delete <- function(sid, upload_id, api_key=NULL, api_base_url=NULL) {
 #'
 #' # Basic usage
 #' result <- me_upload_file_chunked(
-#'   sid       = "PROJECT_IDNO",
 #'   file_path = "/path/to/large-file.zip"
 #' )
 #'
 #' # Use a custom 5 MB chunk size
 #' result <- me_upload_file_chunked(
-#'   sid        = "PROJECT_IDNO",
 #'   file_path  = "/path/to/large-file.zip",
 #'   chunk_size = 5242880
 #' )
 #'
 #' # Resume an interrupted upload
 #' result <- me_upload_file_chunked(
-#'   sid              = "PROJECT_IDNO",
 #'   file_path        = "/path/to/large-file.zip",
 #'   resume_upload_id = "abc123-upload-id"
 #' )
 #'
 #' @export
-me_upload_file_chunked <- function(sid,
+me_upload_file_chunked <- function(sid = NULL,
                                 file_path,
                                 chunk_size=10485760,
                                 metadata=list(),
@@ -357,8 +353,8 @@ me_upload_file_chunked <- function(sid,
     )
 
     if (result$status_code != 200) {
-      stop(sprintf("Chunk %d failed (HTTP %d): %s",
-                   i, result$status_code, content(result$response, "text")))
+      msg <- if (is.list(result$response) && !is.null(result$response$message)) result$response$message else "see response"
+      stop(sprintf("Chunk %d failed (HTTP %d): %s", i, result$status_code, msg))
     }
 
     last_response <- result

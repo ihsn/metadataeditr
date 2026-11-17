@@ -5,7 +5,7 @@
 \title{Upload a file using chunked resumable upload}
 \usage{
 me_upload_file_chunked(
-  sid,
+  sid = NULL,
   file_path,
   chunk_size = 10485760,
   metadata = list(),
@@ -16,7 +16,7 @@ me_upload_file_chunked(
 )
 }
 \arguments{
-\item{sid}{(required) Project ID/IDNO used by upload routes}
+\item{sid}{Unused; uploads are not tied to a project. Kept for backward compatibility.}
 
 \item{file_path}{(required) Path to the local file to upload}
 
@@ -54,20 +54,17 @@ first to fetch the server's recommended chunk size.
 
 # Basic usage
 result <- me_upload_file_chunked(
-  sid       = "PROJECT_IDNO",
   file_path = "/path/to/large-file.zip"
 )
 
 # Use a custom 5 MB chunk size
 result <- me_upload_file_chunked(
-  sid        = "PROJECT_IDNO",
   file_path  = "/path/to/large-file.zip",
   chunk_size = 5242880
 )
 
 # Resume an interrupted upload
 result <- me_upload_file_chunked(
-  sid              = "PROJECT_IDNO",
   file_path        = "/path/to/large-file.zip",
   resume_upload_id = "abc123-upload-id"
 )

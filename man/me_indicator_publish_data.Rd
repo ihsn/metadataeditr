@@ -12,6 +12,8 @@ me_indicator_publish_data(
   implied_freq_code = NULL,
   keep_extra_csv_columns = FALSE,
   delimiter = ",",
+  resumable = FALSE,
+  chunk_size = 10485760,
   api_key = NULL,
   api_base_url = NULL
 )
@@ -32,13 +34,20 @@ stop if \code{import_ready} is false. Default \code{TRUE}.}
 
 \item{delimiter}{CSV delimiter for prepare. Default \code{","}.}
 
+\item{resumable}{Send the CSV in chunks with \code{\link{me_upload_file_chunked}}
+and prepare it by \code{upload_id}. Use for files larger than the web
+server's request body limit. Default \code{FALSE}.}
+
+\item{chunk_size}{Chunk size in bytes when \code{resumable = TRUE}. Default 10 MB.}
+
 \item{api_key}{API key (optional).}
 
 \item{api_base_url}{API base endpoint (optional).}
 }
 \value{
 List with \code{prepare} and \code{import} sub-lists (each has
-  \code{status_code} and \code{response}).
+  \code{status_code} and \code{response}), plus \code{upload_id} when
+  \code{resumable = TRUE}.
 }
 \description{
 Stages a CSV, validates headers against the bound DSD, and imports rows for the
