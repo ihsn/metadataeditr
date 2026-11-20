@@ -414,7 +414,11 @@ me_indicator_dsd_upload_import <- function(project_id,
 #' @param check_import_ready Call \code{\link{me_indicator_dsd_binding}} first and
 #'   stop if \code{import_ready} is false. Default \code{TRUE}.
 #' @param wait Block until import completes. Default \code{TRUE}.
-#' @param implied_freq_code SDMX FREQ when structure has no periodicity column.
+#' @param implied_freq_code SDMX FREQ code (e.g. \code{"A"}) for structures with no
+#'   periodicity column. Saved on the project by the import request, replacing any
+#'   series FREQ already set. When given, a missing series FREQ does not fail the
+#'   \code{check_import_ready} check, and the code is checked against the editor's
+#'   configured FREQ codes before the CSV is uploaded.
 #' @param keep_extra_csv_columns Pass extra CSV columns through to import.
 #' @param delimiter CSV delimiter for prepare. Default \code{","}.
 #' @param resumable Send the CSV in chunks with \code{\link{me_upload_file_chunked}}
@@ -448,10 +452,32 @@ me_indicator_publish_data <- function(project_id,
     if (binding$status_code != 200) {
       stop("Could not read DSD binding (HTTP ", binding$status_code, ")", call. = FALSE)
     }
-    if (!isTRUE(binding$response$import_ready)) {
-      reasons <- binding$response$import_blocked_reasons
-      msg <- if (length(reasons)) paste(reasons, collapse = "; ") else "import not ready"
-      stop("Project is not ready for data import: ", msg, call. = FALSE)
+    b <- binding$response
+    freq_supplied <- !is.null(implied_freq_code) && nzchar(trimws(as.character(implied_freq_code)))
+
+    if (freq_supplied) {
+      allowed <- b$freq_codes
+      allowed <- if (is.data.frame(allowed)) {
+        allowed$code
+      } else {
+        vapply(allowed, function(x) as.character(x$code), character(1))
+      }
+      if (length(allowed) && !(trimws(as.character(implied_freq_code)) %in% allowed)) {
+        stop("implied_freq_code '", implied_freq_code,
+             "' is not a configured SDMX FREQ code", call. = FALSE)
+      }
+    }
+
+    if (!isTRUE(b$import_ready)) {
+      reasons <- b$import_blocked_reasons
+      # The import request saves implied_freq_code before its own readiness check,
+      # so a missing series FREQ is not blocking when the caller supplies one.
+      freq_missing <- isTRUE(b$needs_implied_freq_code) && is.null(b$implied_freq_code)
+      n_blocking <- length(reasons) - as.integer(freq_supplied && freq_missing)
+      if (n_blocking > 0 || !length(reasons)) {
+        msg <- if (length(reasons)) paste(reasons, collapse = "; ") else "import not ready"
+        stop("Project is not ready for data import: ", msg, call. = FALSE)
+      }
     }
   }
 

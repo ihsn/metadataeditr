@@ -28,7 +28,11 @@ stop if \code{import_ready} is false. Default \code{TRUE}.}
 
 \item{wait}{Block until import completes. Default \code{TRUE}.}
 
-\item{implied_freq_code}{SDMX FREQ when structure has no periodicity column.}
+\item{implied_freq_code}{SDMX FREQ code (e.g. \code{"A"}) for structures with no
+periodicity column. Saved on the project by the import request, replacing any
+series FREQ already set. When given, a missing series FREQ does not fail the
+\code{check_import_ready} check, and the code is checked against the editor's
+configured FREQ codes before the CSV is uploaded.}
 
 \item{keep_extra_csv_columns}{Pass extra CSV columns through to import.}
 
